@@ -2,12 +2,13 @@
 
 ## Purpose
 
-This plan defines the AirLLM experiment before installing AirLLM or running any
-new model execution. The direct Transformers baseline for
+This plan defines the AirLLM experiment before running AirLLM model execution.
+The direct Transformers baseline for
 `Qwen/Qwen2.5-3B-Instruct` timed out after 900 seconds, so AirLLM is now the
 main optimization intervention to test.
 
-No AirLLM dependency is installed as part of this plan.
+AirLLM has since been installed in the project environment. The install check is
+recorded in `results/airllm_install_check.json`.
 
 ## Baseline To Improve
 
@@ -35,6 +36,21 @@ the same model, prompt, and generation limit so the comparison remains fair.
 | Optional compression | `4bit` or `8bit` only if supported in the installed AirLLM version |
 | Timeout | 1800 seconds |
 | Planned result file | `results/airllm_qwen_qwen2_5_3b_instruct.json` |
+
+## Installed Dependency Notes
+
+AirLLM installation required compatibility pins:
+
+- `airllm==2.11.0`
+- `optimum<2`, because AirLLM imports `optimum.bettertransformer`.
+- `transformers>=4.41.2,<4.49`, because `optimum.bettertransformer` rejects
+  newer Transformers versions.
+- `sentencepiece`, because AirLLM imports the Baichuan tokenizer during package
+  initialization.
+
+The exact command `python -c "import airllm; print(airllm.__version__)"` is not a
+valid version check for this package because `airllm` does not expose
+`__version__`. The verified metadata version is `2.11.0`.
 
 ## Experiment Question
 
@@ -81,11 +97,8 @@ AirLLM should be analyzed through the lecture concepts:
 
 ## Next Implementation Checkpoint
 
-After this plan is committed:
+After the runner implementation is committed:
 
-1. Explicitly approve installing AirLLM.
-2. Verify `import airllm` in the project environment.
-3. Add `experiments/run_airllm.py` and an AirLLM runner module.
-4. Run the same prompt/settings against `Qwen/Qwen2.5-3B-Instruct`.
-5. Save a raw JSON result whether the run succeeds, fails, or times out.
-
+1. Run the same prompt/settings against `Qwen/Qwen2.5-3B-Instruct`.
+2. Save a raw JSON result whether the run succeeds, fails, or times out.
+3. Compare the AirLLM result with the direct Transformers timeout baseline.

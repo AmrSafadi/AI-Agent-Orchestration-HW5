@@ -9,8 +9,9 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 - Documentation scaffold exists under `docs/`.
 - Project directories exist for source code, experiments, config, results, and figures.
 - Hardware collection is implemented as the first reproducible experiment.
-- Main planned assignment model is `Qwen/Qwen2.5-3B-Instruct`; no large model
-  weights have been downloaded yet.
+- Main assignment model is `Qwen/Qwen2.5-3B-Instruct`.
+- Direct Transformers baseline timed out after 900 seconds.
+- AirLLM is installed and an AirLLM runner entry point exists.
 
 ## Repository Structure
 
@@ -19,12 +20,19 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |-- config/
 |   `-- experiment.example.json
 |-- docs/
+|   |-- AIRLLM_PLAN.md
+|   |-- BASELINE_RESULTS.md
+|   |-- BACKEND_COMPATIBILITY.md
+|   |-- MEMORY_ESTIMATES.md
+|   |-- MODEL_SELECTION.md
 |   |-- PLAN.md
 |   |-- PRD.md
 |   |-- PRD_benchmarking.md
 |   `-- TODO.md
 |-- experiments/
 |   |-- collect_hardware.py
+|   |-- check_backends.py
+|   |-- run_airllm.py
 |   `-- run_baseline.py
 |-- figures/
 |-- materials/
@@ -36,6 +44,7 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |       |-- metrics.py
 |       `-- runners/
 |           |-- __init__.py
+|           |-- airllm.py
 |           `-- baseline.py
 |-- pyproject.toml
 `-- README.md
@@ -108,8 +117,11 @@ layer/cache path is:
 airllm_cache/qwen2_5_3b_instruct
 ```
 
-AirLLM has not been installed yet. The detailed plan is documented in
-`docs/AIRLLM_PLAN.md`.
+AirLLM has been installed and verified through the project `uv` environment.
+The exact `airllm.__version__` attribute check fails because the package does
+not expose that attribute, but package metadata reports `airllm==2.11.0`. The
+install check is stored in `results/airllm_install_check.json`, and the detailed
+plan is documented in `docs/AIRLLM_PLAN.md`.
 
 ## Planned Report Sections
 

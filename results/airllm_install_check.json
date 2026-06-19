@@ -1,0 +1,17 @@
+{
+  "package": "airllm",
+  "installed": true,
+  "metadata_version": "2.11.0",
+  "import_airllm": "success",
+  "import_auto_model": "success",
+  "auto_model_class": "airllm.auto_model.AutoModel",
+  "requested_version_command": "python -c \"import airllm; print(airllm.__version__)\"",
+  "requested_version_command_status": "failed",
+  "requested_version_command_error": "AttributeError: module 'airllm' has no attribute '__version__'",
+  "verification_notes": "Bare python outside uv did not see the project environment. Inside uv, AirLLM imports successfully but the package does not expose __version__; importlib.metadata reports version 2.11.0.",
+  "dependency_adjustments": [
+    "Pinned optimum<2 because AirLLM imports optimum.bettertransformer.",
+    "Pinned transformers>=4.41.2,<4.49 because optimum.bettertransformer rejects newer Transformers.",
+    "Added sentencepiece because AirLLM imports the Baichuan tokenizer during package initialization."
+  ]
+}

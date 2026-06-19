@@ -56,8 +56,8 @@
 
 - [x] Create AirLLM experiment plan.
 - [x] Configure planned model shard/cache path.
-- [ ] Install and verify AirLLM dependencies.
-- [ ] Implement AirLLM runner.
+- [x] Install and verify AirLLM dependencies.
+- [x] Implement AirLLM runner.
 - [ ] Run the same prompt and generation settings.
 - [ ] Test quantization settings supported by the environment.
 - [ ] Save raw AirLLM results.
