@@ -85,6 +85,19 @@ results/baseline_tiny_gpt2.json
 The selected 3B Qwen model is intended to stress the 15.8 GB RAM laptop without
 making the first real experiment as risky as a full 7B BF16 direct load.
 
+## Current Baseline Result
+
+The direct Transformers baseline for `Qwen/Qwen2.5-3B-Instruct` timed out after
+900 seconds with the fixed prompt and a 32-token generation limit. The raw result
+is stored in:
+
+```text
+results/baseline_qwen_qwen2_5_3b_instruct.json
+```
+
+This is a valid negative baseline outcome: direct BF16 Transformers execution is
+not comfortable on the current CPU/RAM-only laptop setup.
+
 ## Planned Report Sections
 
 - Hardware specification.

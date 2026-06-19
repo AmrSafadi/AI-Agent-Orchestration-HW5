@@ -46,10 +46,10 @@
 - [x] Run tiny baseline smoke test with `sshleifer/tiny-gpt2`.
 - [x] Save tiny baseline result to `results/baseline_tiny_gpt2.json`.
 - [x] Implement Qwen 3B baseline runner.
-- [ ] Run fixed prompt with fixed generation settings.
-- [ ] Capture load failure, timeout, or successful output.
+- [x] Run fixed prompt with fixed generation settings.
+- [x] Capture load failure, timeout, or successful output.
 - [ ] Measure runtime, memory, and token statistics where possible.
-- [ ] Save raw baseline results.
+- [x] Save raw baseline results.
 - [ ] Add baseline screenshots or terminal evidence if useful.
 
 ## Phase 6: AirLLM Experiment

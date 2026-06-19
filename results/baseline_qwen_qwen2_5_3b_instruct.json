@@ -1,0 +1,19 @@
+{
+  "run_id": "baseline-transformers-179d4e4e0fc1",
+  "backend": "transformers",
+  "model": "Qwen/Qwen2.5-3B-Instruct",
+  "quantization": null,
+  "status": "timeout",
+  "prompt": "Explain the difference between prefill and decode in local LLM inference.",
+  "input_tokens": null,
+  "output_tokens": null,
+  "ttft_seconds": null,
+  "tpot_seconds": null,
+  "tokens_per_second": null,
+  "total_runtime_seconds": 900.0,
+  "peak_ram_mb": null,
+  "peak_vram_mb": null,
+  "output_sample": null,
+  "error": "Timed out after 900 seconds.",
+  "notes": "The baseline worker was terminated after exceeding the configured timeout. Transformers was allowed to use the network/cache according to its default behavior."
+}
