@@ -133,6 +133,11 @@ and progressed through AirLLM layer sharding, but failed before generation with
 `IndexError: list index out of range`. The current raw AirLLM result is stored in
 `results/airllm_qwen_qwen2_5_3b_instruct.json`.
 
+The documented backup model, `microsoft/Phi-3-mini-4k-instruct`, was also tried
+with AirLLM. Sharding completed, but generation failed because Optimum
+BetterTransformer does not support model type `phi3`. The raw result is stored
+in `results/airllm_phi3_mini_instruct.json`.
+
 ## Planned Report Sections
 
 - Hardware specification.

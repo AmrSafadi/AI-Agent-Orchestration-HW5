@@ -93,3 +93,45 @@ The AirLLM path has now exposed two distinct deployment issues:
 The next engineering decision is whether to patch around the Qwen layout issue,
 try the backup HF model, or move to the planned quantized GGUF comparison for
 the quantization part of the assignment.
+
+## Attempt 3: Phi-3 Mini Backup AirLLM
+
+| Field | Value |
+| --- | --- |
+| Model | `microsoft/Phi-3-mini-4k-instruct` |
+| Backend | AirLLM |
+| Role | Backup HF model |
+| Layer/cache path | `airllm_cache/phi3_mini_instruct` |
+| Result file | `results/airllm_phi3_mini_instruct.json` |
+| Status | `failed` |
+| Error | `NotImplementedError: The model type phi3 is not yet supported to be used with BetterTransformer` |
+
+The backup-model attempt also made real progress before failing:
+
+- AirLLM downloaded Phi-3 Mini model files through the local cache strategy.
+- AirLLM did not recognize `Phi3ForCausalLM` directly and fell back to its Llama2
+  path.
+- AirLLM split and saved the embedding layer, transformer layers 0-31, norm, and
+  `lm_head`.
+- Generation did not start because Optimum BetterTransformer does not support
+  `phi3`.
+
+This confirms that the backup model avoids the Qwen-specific `IndexError`, but
+hits a different AirLLM dependency limitation. The evidence supports the report
+claim that local LLM deployment depends on an exact match among model
+architecture, model format, backend implementation, dependency versions, and
+operating-system behavior.
+
+## Phase 6 Conclusion
+
+AirLLM was installed and exercised against both the selected Qwen 3B model and
+the documented Phi-3 backup. Neither produced completed generation, but both
+produced useful deployment evidence:
+
+- Qwen 3B: Windows cache issue was mitigated; AirLLM then failed on model-layout
+  handling after partial sharding.
+- Phi-3 Mini: AirLLM completed sharding but failed because BetterTransformer does
+  not support `phi3`.
+
+The next practical path for the quantization requirement is the planned GGUF
+comparison rather than further patching AirLLM internals.

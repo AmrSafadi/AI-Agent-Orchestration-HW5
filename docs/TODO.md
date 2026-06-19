@@ -59,6 +59,7 @@
 - [x] Install and verify AirLLM dependencies.
 - [x] Implement AirLLM runner.
 - [x] Run the same prompt and generation settings.
+- [x] Run AirLLM backup model attempt.
 - [ ] Test quantization settings supported by the environment.
 - [x] Save raw AirLLM results.
 
