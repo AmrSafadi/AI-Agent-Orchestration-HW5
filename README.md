@@ -9,6 +9,8 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 - Documentation scaffold exists under `docs/`.
 - Project directories exist for source code, experiments, config, results, and figures.
 - Hardware collection is implemented as the first reproducible experiment.
+- Main planned assignment model is `Qwen/Qwen2.5-3B-Instruct`; no large model
+  weights have been downloaded yet.
 
 ## Repository Structure
 
@@ -69,6 +71,19 @@ The command writes the smoke-test benchmark result to:
 ```text
 results/baseline_tiny_gpt2.json
 ```
+
+## Planned Model Strategy
+
+| Role | Model |
+| --- | --- |
+| Completed pipeline validation | `sshleifer/tiny-gpt2` |
+| Main HF/AirLLM candidate | `Qwen/Qwen2.5-3B-Instruct` |
+| Optional quantized GGUF comparison | `Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` |
+| Backup HF candidate | `microsoft/Phi-3-mini-4k-instruct` |
+| Deferred as too large for first download | `Qwen/Qwen2.5-7B-Instruct` |
+
+The selected 3B Qwen model is intended to stress the 15.8 GB RAM laptop without
+making the first real experiment as risky as a full 7B BF16 direct load.
 
 ## Planned Report Sections
 

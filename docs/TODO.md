@@ -37,15 +37,15 @@
 - [x] Estimate memory requirements.
 - [x] Justify why the model stresses the local machine.
 - [x] Verify installed backend availability without downloading model weights.
-- [ ] Finalize backend-specific model IDs.
-- [ ] Record selected model in config and README.
+- [x] Finalize backend-specific model IDs.
+- [x] Record selected model in config and README.
 
 ## Phase 5: Baseline Experiment
 
 - [x] Implement tiny baseline smoke-test runner.
 - [x] Run tiny baseline smoke test with `sshleifer/tiny-gpt2`.
 - [x] Save tiny baseline result to `results/baseline_tiny_gpt2.json`.
-- [ ] Implement Phi-3 baseline runner.
+- [ ] Implement Qwen 3B baseline runner.
 - [ ] Run fixed prompt with fixed generation settings.
 - [ ] Capture load failure, timeout, or successful output.
 - [ ] Measure runtime, memory, and token statistics where possible.

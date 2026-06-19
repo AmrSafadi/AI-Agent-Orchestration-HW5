@@ -1,8 +1,16 @@
 {
   "model": {
-    "id": "to-be-selected-after-hardware-inspection",
-    "license": "to-be-documented",
-    "format": "to-be-documented"
+    "id": "Qwen/Qwen2.5-3B-Instruct",
+    "role": "main_hf_airllm_candidate",
+    "license": "qwen-research",
+    "format": "Hugging Face SafeTensors / BF16"
+  },
+  "candidate_models": {
+    "pipeline_validation": "sshleifer/tiny-gpt2",
+    "main_hf_airllm_candidate": "Qwen/Qwen2.5-3B-Instruct",
+    "main_gguf_quantized_candidate": "Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M",
+    "backup_hf_candidate": "microsoft/Phi-3-mini-4k-instruct",
+    "deferred_too_large_candidate": "Qwen/Qwen2.5-7B-Instruct"
   },
   "generation": {
     "prompt": "Explain the difference between prefill and decode in local LLM inference.",
@@ -23,4 +31,3 @@
     "api_output_usd_per_million_tokens": 0
   }
 }
-
