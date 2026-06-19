@@ -58,9 +58,9 @@
 - [x] Configure planned model shard/cache path.
 - [x] Install and verify AirLLM dependencies.
 - [x] Implement AirLLM runner.
-- [ ] Run the same prompt and generation settings.
+- [x] Run the same prompt and generation settings.
 - [ ] Test quantization settings supported by the environment.
-- [ ] Save raw AirLLM results.
+- [x] Save raw AirLLM results.
 
 ## Phase 7: Analysis and Figures
 

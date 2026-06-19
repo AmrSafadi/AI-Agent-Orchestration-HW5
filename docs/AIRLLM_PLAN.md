@@ -97,8 +97,9 @@ AirLLM should be analyzed through the lecture concepts:
 
 ## Next Implementation Checkpoint
 
-After the runner implementation is committed:
+After the first AirLLM failure is recorded:
 
-1. Run the same prompt/settings against `Qwen/Qwen2.5-3B-Instruct`.
-2. Save a raw JSON result whether the run succeeds, fails, or times out.
+1. Configure a Windows-safe Hugging Face cache/download strategy that avoids
+   requiring symlink privileges.
+2. Retry the same AirLLM prompt/settings.
 3. Compare the AirLLM result with the direct Transformers timeout baseline.

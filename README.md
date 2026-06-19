@@ -123,6 +123,11 @@ not expose that attribute, but package metadata reports `airllm==2.11.0`. The
 install check is stored in `results/airllm_install_check.json`, and the detailed
 plan is documented in `docs/AIRLLM_PLAN.md`.
 
+The first AirLLM execution attempt failed before benchmarking because Hugging
+Face cache symlink creation hit Windows privilege error `WinError 1314`. The raw
+result is stored in `results/airllm_qwen_qwen2_5_3b_instruct.json` and
+documented in `docs/AIRLLM_RESULTS.md`.
+
 ## Planned Report Sections
 
 - Hardware specification.
