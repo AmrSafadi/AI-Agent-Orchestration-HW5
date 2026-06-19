@@ -22,6 +22,15 @@
     "figures_dir": "figures",
     "airllm_cache_dir": "airllm_cache"
   },
+  "airllm": {
+    "enabled": false,
+    "model_id": "Qwen/Qwen2.5-3B-Instruct",
+    "layer_shards_saving_path": "airllm_cache/qwen2_5_3b_instruct",
+    "compression": null,
+    "delete_original": false,
+    "timeout_seconds": 1800,
+    "result_file": "airllm_qwen_qwen2_5_3b_instruct.json"
+  },
   "economics": {
     "hardware_cost_usd": 0,
     "hardware_lifetime_months": 36,

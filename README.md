@@ -98,6 +98,19 @@ results/baseline_qwen_qwen2_5_3b_instruct.json
 This is a valid negative baseline outcome: direct BF16 Transformers execution is
 not comfortable on the current CPU/RAM-only laptop setup.
 
+## Planned AirLLM Experiment
+
+The next planned intervention is AirLLM with the same
+`Qwen/Qwen2.5-3B-Instruct` model, prompt, and generation settings. The planned
+layer/cache path is:
+
+```text
+airllm_cache/qwen2_5_3b_instruct
+```
+
+AirLLM has not been installed yet. The detailed plan is documented in
+`docs/AIRLLM_PLAN.md`.
+
 ## Planned Report Sections
 
 - Hardware specification.

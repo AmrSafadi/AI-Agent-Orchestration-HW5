@@ -54,8 +54,9 @@
 
 ## Phase 6: AirLLM Experiment
 
+- [x] Create AirLLM experiment plan.
+- [x] Configure planned model shard/cache path.
 - [ ] Install and verify AirLLM dependencies.
-- [ ] Configure model shard/cache path.
 - [ ] Implement AirLLM runner.
 - [ ] Run the same prompt and generation settings.
 - [ ] Test quantization settings supported by the environment.
