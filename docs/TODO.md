@@ -45,7 +45,7 @@
 - [x] Implement tiny baseline smoke-test runner.
 - [x] Run tiny baseline smoke test with `sshleifer/tiny-gpt2`.
 - [x] Save tiny baseline result to `results/baseline_tiny_gpt2.json`.
-- [ ] Implement Qwen 3B baseline runner.
+- [x] Implement Qwen 3B baseline runner.
 - [ ] Run fixed prompt with fixed generation settings.
 - [ ] Capture load failure, timeout, or successful output.
 - [ ] Measure runtime, memory, and token statistics where possible.

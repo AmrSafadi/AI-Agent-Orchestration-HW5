@@ -1,0 +1,70 @@
+"""Experiment config loading helpers."""
+
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+
+@dataclass(frozen=True)
+class BaselineRunConfig:
+    """Configuration needed for a Transformers baseline run."""
+
+    model_id: str
+    prompt: str
+    max_new_tokens: int
+    temperature: float
+    output_path: Path
+    local_files_only: bool = True
+    timeout_seconds: int | None = None
+
+
+def load_baseline_config(config_path: Path, project_root: Path) -> BaselineRunConfig:
+    """Load the baseline subset of the experiment JSON config."""
+
+    raw = json.loads(config_path.read_text(encoding="utf-8"))
+    model = _required_dict(raw, "model")
+    generation = _required_dict(raw, "generation")
+    paths = _required_dict(raw, "paths")
+
+    results_dir = project_root / str(paths.get("results_dir", "results"))
+    model_id = _required_str(model, "id")
+    output_name = _baseline_output_name(model_id)
+
+    return BaselineRunConfig(
+        model_id=model_id,
+        prompt=_required_str(generation, "prompt"),
+        max_new_tokens=int(generation.get("max_new_tokens", 64)),
+        temperature=float(generation.get("temperature", 0.0)),
+        output_path=results_dir / output_name,
+        local_files_only=True,
+        timeout_seconds=None,
+    )
+
+
+def _baseline_output_name(model_id: str) -> str:
+    slug = (
+        model_id.lower()
+        .replace("/", "_")
+        .replace("-", "_")
+        .replace(".", "_")
+        .replace(":", "_")
+    )
+    return f"baseline_{slug}.json"
+
+
+def _required_dict(raw: dict[str, Any], key: str) -> dict[str, Any]:
+    value = raw.get(key)
+    if not isinstance(value, dict):
+        raise ValueError(f"Config key '{key}' must be an object.")
+    return value
+
+
+def _required_str(raw: dict[str, Any], key: str) -> str:
+    value = raw.get(key)
+    if not isinstance(value, str) or not value:
+        raise ValueError(f"Config key '{key}' must be a non-empty string.")
+    return value
+
