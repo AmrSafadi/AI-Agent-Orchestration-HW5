@@ -99,7 +99,6 @@ AirLLM should be analyzed through the lecture concepts:
 
 After the first AirLLM failure is recorded:
 
-1. Configure a Windows-safe Hugging Face cache/download strategy that avoids
-   requiring symlink privileges.
-2. Retry the same AirLLM prompt/settings.
+1. Retry the same AirLLM prompt/settings with the normal timeout.
+2. Save the real AirLLM result file.
 3. Compare the AirLLM result with the direct Transformers timeout baseline.

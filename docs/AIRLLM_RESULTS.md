@@ -47,3 +47,12 @@ The next retry should avoid requiring symlink privileges. Preferred mitigations:
 - Avoid requiring administrator privileges or Windows Developer Mode unless
   documented as an optional workaround.
 
+## Mitigation Smoke Retry
+
+A short 10-second retry was run after adding a project-local Hugging Face cache
+and disabling symlink use inside the AirLLM worker on Windows. The retry reached
+metadata/file fetching and layer loading, then timed out intentionally after 10
+seconds with peak RAM recorded.
+
+This confirms the symlink privilege failure was bypassed. The next run can use
+the normal AirLLM timeout and save the real result file.

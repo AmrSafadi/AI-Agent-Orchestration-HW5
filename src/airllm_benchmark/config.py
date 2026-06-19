@@ -30,6 +30,7 @@ class AirLLMRunConfig:
     max_new_tokens: int
     temperature: float
     output_path: Path
+    huggingface_cache_dir: Path
     layer_shards_saving_path: Path
     compression: str | None
     delete_original: bool
@@ -71,6 +72,7 @@ def load_airllm_config(config_path: Path, project_root: Path) -> AirLLMRunConfig
     model_id = str(airllm.get("model_id") or _required_str(model, "id"))
     results_dir = project_root / str(paths.get("results_dir", "results"))
     result_file = str(airllm.get("result_file") or _airllm_output_name(model_id))
+    hf_cache = project_root / str(airllm.get("huggingface_cache_dir", "model_cache/huggingface"))
     layer_path = project_root / _required_str(airllm, "layer_shards_saving_path")
 
     compression = airllm.get("compression")
@@ -83,6 +85,7 @@ def load_airllm_config(config_path: Path, project_root: Path) -> AirLLMRunConfig
         max_new_tokens=int(generation.get("max_new_tokens", 64)),
         temperature=float(generation.get("temperature", 0.0)),
         output_path=results_dir / result_file,
+        huggingface_cache_dir=hf_cache,
         layer_shards_saving_path=layer_path,
         compression=compression,
         delete_original=bool(airllm.get("delete_original", False)),

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import multiprocessing as mp
+import os
+import sys
 import time
 from pathlib import Path
 from queue import Empty
@@ -29,6 +31,7 @@ def run_airllm_baseline(
     max_new_tokens: int,
     temperature: float,
     layer_shards_saving_path: Path,
+    huggingface_cache_dir: Path,
     compression: str | None,
     delete_original: bool,
     timeout_seconds: int | None = DEFAULT_AIRLLM_TIMEOUT_SECONDS,
@@ -44,6 +47,7 @@ def run_airllm_baseline(
             max_new_tokens=max_new_tokens,
             temperature=temperature,
             layer_shards_saving_path=layer_shards_saving_path,
+            huggingface_cache_dir=huggingface_cache_dir,
             compression=compression,
             delete_original=delete_original,
         )
@@ -55,6 +59,7 @@ def run_airllm_baseline(
             max_new_tokens=max_new_tokens,
             temperature=temperature,
             layer_shards_saving_path=layer_shards_saving_path,
+            huggingface_cache_dir=huggingface_cache_dir,
             compression=compression,
             delete_original=delete_original,
             timeout_seconds=timeout_seconds,
@@ -72,6 +77,7 @@ def _run_airllm_with_timeout(
     max_new_tokens: int,
     temperature: float,
     layer_shards_saving_path: Path,
+    huggingface_cache_dir: Path,
     compression: str | None,
     delete_original: bool,
     timeout_seconds: int,
@@ -87,6 +93,7 @@ def _run_airllm_with_timeout(
             "max_new_tokens": max_new_tokens,
             "temperature": temperature,
             "layer_shards_saving_path": layer_shards_saving_path,
+            "huggingface_cache_dir": huggingface_cache_dir,
             "compression": compression,
             "delete_original": delete_original,
         },
@@ -121,6 +128,7 @@ def _run_airllm_with_timeout(
                 [
                     "The AirLLM worker was terminated after exceeding the configured timeout.",
                     f"Layer shards path: {layer_shards_saving_path}",
+                    f"Hugging Face cache path: {huggingface_cache_dir}",
                 ]
             ),
         )
@@ -158,6 +166,7 @@ def _run_airllm_worker(
     max_new_tokens: int,
     temperature: float,
     layer_shards_saving_path: Path,
+    huggingface_cache_dir: Path,
     compression: str | None,
     delete_original: bool,
 ) -> None:
@@ -168,6 +177,7 @@ def _run_airllm_worker(
         max_new_tokens=max_new_tokens,
         temperature=temperature,
         layer_shards_saving_path=layer_shards_saving_path,
+        huggingface_cache_dir=huggingface_cache_dir,
         compression=compression,
         delete_original=delete_original,
     )
@@ -182,6 +192,7 @@ def _run_airllm_with_error_capture(
     max_new_tokens: int,
     temperature: float,
     layer_shards_saving_path: Path,
+    huggingface_cache_dir: Path,
     compression: str | None,
     delete_original: bool,
 ) -> BenchmarkResult:
@@ -193,6 +204,7 @@ def _run_airllm_with_error_capture(
             max_new_tokens=max_new_tokens,
             temperature=temperature,
             layer_shards_saving_path=layer_shards_saving_path,
+            huggingface_cache_dir=huggingface_cache_dir,
             compression=compression,
             delete_original=delete_original,
         )
@@ -218,6 +230,7 @@ def _run_airllm_with_error_capture(
                 [
                     "AirLLM failed before producing a complete benchmark.",
                     f"Layer shards path: {layer_shards_saving_path}",
+                    f"Hugging Face cache path: {huggingface_cache_dir}",
                 ]
             ),
         )
@@ -231,12 +244,14 @@ def _run_airllm_success_path(
     max_new_tokens: int,
     temperature: float,
     layer_shards_saving_path: Path,
+    huggingface_cache_dir: Path,
     compression: str | None,
     delete_original: bool,
 ) -> BenchmarkResult:
     import torch
     from airllm import AutoModel
 
+    _configure_huggingface_cache(huggingface_cache_dir)
     layer_shards_saving_path.mkdir(parents=True, exist_ok=True)
     start = time.perf_counter()
     with ProcessMemorySampler() as memory:
@@ -296,7 +311,30 @@ def _run_airllm_success_path(
             [
                 "TTFT is null because this non-streaming AirLLM runner measures total generation only.",
                 f"Layer shards path: {layer_shards_saving_path}",
+                f"Hugging Face cache path: {huggingface_cache_dir}",
                 f"Compression: {compression or 'none'}",
             ]
         ),
     )
+
+
+def _configure_huggingface_cache(cache_dir: Path) -> None:
+    """Use a project-local Hugging Face cache and avoid Windows symlink privileges."""
+
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    hub_cache_dir = cache_dir / "hub"
+    hub_cache_dir.mkdir(parents=True, exist_ok=True)
+
+    os.environ["HF_HOME"] = str(cache_dir)
+    os.environ["HF_HUB_CACHE"] = str(hub_cache_dir)
+    os.environ["TRANSFORMERS_CACHE"] = str(hub_cache_dir)
+    os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+
+    import huggingface_hub.constants as hf_constants
+    import huggingface_hub.file_download as hf_file_download
+
+    hf_constants.HF_HOME = str(cache_dir)
+    hf_constants.HF_HUB_CACHE = str(hub_cache_dir)
+
+    if sys.platform == "win32":
+        hf_file_download.are_symlinks_supported = lambda cache_dir=None: False

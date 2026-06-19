@@ -128,6 +128,9 @@ Face cache symlink creation hit Windows privilege error `WinError 1314`. The raw
 result is stored in `results/airllm_qwen_qwen2_5_3b_instruct.json` and
 documented in `docs/AIRLLM_RESULTS.md`.
 
+A short retry using a project-local Hugging Face cache bypassed the symlink
+failure and reached AirLLM layer loading before the intentionally short timeout.
+
 ## Planned Report Sections
 
 - Hardware specification.

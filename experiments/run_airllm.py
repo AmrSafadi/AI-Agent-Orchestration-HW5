@@ -34,6 +34,7 @@ def main() -> None:
         max_new_tokens=config.max_new_tokens,
         temperature=config.temperature,
         layer_shards_saving_path=config.layer_shards_saving_path,
+        huggingface_cache_dir=config.huggingface_cache_dir,
         compression=config.compression,
         delete_original=config.delete_original,
         timeout_seconds=config.timeout_seconds,
@@ -55,6 +56,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--max-new-tokens", type=int, help="Override generation token limit.")
     parser.add_argument("--temperature", type=float, help="Override generation temperature.")
     parser.add_argument("--output", type=Path, help="Override output JSON path.")
+    parser.add_argument("--huggingface-cache-dir", type=Path, help="Override Hugging Face cache path.")
     parser.add_argument("--layer-shards-saving-path", type=Path, help="Override AirLLM shard path.")
     parser.add_argument("--compression", help="AirLLM compression setting, such as 4bit or 8bit.")
     parser.add_argument(
@@ -97,6 +99,7 @@ def _resolve_config(args: argparse.Namespace) -> AirLLMRunConfig:
         max_new_tokens=args.max_new_tokens or config.max_new_tokens,
         temperature=config.temperature if args.temperature is None else args.temperature,
         output_path=args.output or config.output_path,
+        huggingface_cache_dir=args.huggingface_cache_dir or config.huggingface_cache_dir,
         layer_shards_saving_path=args.layer_shards_saving_path or config.layer_shards_saving_path,
         compression=args.compression if args.compression is not None else config.compression,
         delete_original=args.delete_original or config.delete_original,
@@ -111,6 +114,7 @@ def _config_as_json(config: AirLLMRunConfig) -> dict[str, object]:
         "max_new_tokens": config.max_new_tokens,
         "temperature": config.temperature,
         "output_path": str(config.output_path),
+        "huggingface_cache_dir": str(config.huggingface_cache_dir),
         "layer_shards_saving_path": str(config.layer_shards_saving_path),
         "compression": config.compression,
         "delete_original": config.delete_original,

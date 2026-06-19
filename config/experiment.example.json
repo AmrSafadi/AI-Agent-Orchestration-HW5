@@ -25,6 +25,7 @@
   "airllm": {
     "enabled": false,
     "model_id": "Qwen/Qwen2.5-3B-Instruct",
+    "huggingface_cache_dir": "model_cache/huggingface",
     "layer_shards_saving_path": "airllm_cache/qwen2_5_3b_instruct",
     "compression": null,
     "delete_original": false,
