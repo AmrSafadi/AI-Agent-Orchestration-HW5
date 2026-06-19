@@ -11,7 +11,10 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 - Hardware collection is implemented as the first reproducible experiment.
 - Main assignment model is `Qwen/Qwen2.5-3B-Instruct`.
 - Direct Transformers baseline timed out after 900 seconds.
-- AirLLM is installed and an AirLLM runner entry point exists.
+- AirLLM is installed and has been tested against the selected model and backup
+  model.
+- The next planned path is a quantized GGUF comparison, pending explicit backend
+  install and model-download approval.
 
 ## Repository Structure
 
@@ -21,8 +24,10 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |   `-- experiment.example.json
 |-- docs/
 |   |-- AIRLLM_PLAN.md
+|   |-- AIRLLM_RESULTS.md
 |   |-- BASELINE_RESULTS.md
 |   |-- BACKEND_COMPATIBILITY.md
+|   |-- GGUF_QUANTIZATION_PLAN.md
 |   |-- MEMORY_ESTIMATES.md
 |   |-- MODEL_SELECTION.md
 |   |-- PLAN.md
@@ -137,6 +142,19 @@ The documented backup model, `microsoft/Phi-3-mini-4k-instruct`, was also tried
 with AirLLM. Sharding completed, but generation failed because Optimum
 BetterTransformer does not support model type `phi3`. The raw result is stored
 in `results/airllm_phi3_mini_instruct.json`.
+
+## Planned GGUF Quantization Experiment
+
+The next planned experiment is a quantized GGUF comparison using:
+
+```text
+hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M
+```
+
+The preferred first backend is Ollama, because it provides the simplest local
+GGUF path on Windows. No GGUF backend has been installed and no quantized model
+has been downloaded yet. The plan and stop/go criteria are documented in
+`docs/GGUF_QUANTIZATION_PLAN.md`.
 
 ## Planned Report Sections
 

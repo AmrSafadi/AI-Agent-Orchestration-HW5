@@ -63,6 +63,19 @@
 - [ ] Test quantization settings supported by the environment.
 - [x] Save raw AirLLM results.
 
+## Phase 6B: Quantized GGUF Experiment
+
+- [x] Create GGUF quantization plan.
+- [x] Select recommended quantized model candidate.
+- [x] Select preferred GGUF backend path.
+- [ ] Install approved GGUF backend.
+- [ ] Verify GGUF backend availability.
+- [ ] Download approved quantized GGUF model.
+- [ ] Implement GGUF/Ollama benchmark runner or wrapper.
+- [ ] Run the same prompt and generation settings.
+- [ ] Save raw quantized GGUF result.
+- [ ] Compare GGUF result against baseline and AirLLM attempts.
+
 ## Phase 7: Analysis and Figures
 
 - [ ] Implement result loading and summary table generation.
