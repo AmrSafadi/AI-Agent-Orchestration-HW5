@@ -32,6 +32,7 @@ analysis required by the assignment.
 |   |-- AIRLLM_RESULTS.md
 |   |-- BASELINE_RESULTS.md
 |   |-- BACKEND_COMPATIBILITY.md
+|   |-- ECONOMIC_ANALYSIS.md
 |   |-- GGUF_RESULTS.md
 |   |-- GGUF_QUANTIZATION_PLAN.md
 |   |-- MEMORY_ESTIMATES.md
@@ -50,6 +51,7 @@ analysis required by the assignment.
 |   |-- run_ollama.py
 |   `-- summarize_results.py
 |-- figures/
+|   |-- cost_break_even.svg
 |   |-- decode_latency_comparison.svg
 |   |-- memory_comparison.svg
 |   |-- run_status_summary.svg
@@ -122,6 +124,8 @@ Current raw outputs include:
 - `results/airllm_qwen_qwen2_5_3b_instruct.json`
 - `results/airllm_phi3_mini_instruct.json`
 - `results/gguf_qwen2_5_3b_instruct_q4_k_m.json`
+- `results/economics_summary.json`
+- `results/economics_curve.csv`
 
 Temporary smoke-test files use the `.tmp` extension and are ignored by Git.
 
@@ -133,8 +137,10 @@ Current Phase 7 figures:
 - `figures/throughput_comparison.svg`
 - `figures/decode_latency_comparison.svg`
 - `figures/memory_comparison.svg`
+- `figures/cost_break_even.svg`
 
-The next figure should be the Phase 8 cost break-even figure.
+The next report checkpoint should promote the remaining concept explanations and
+limitations into the README.
 
 ## Remaining Plan
 

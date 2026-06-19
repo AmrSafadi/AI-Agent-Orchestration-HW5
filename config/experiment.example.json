@@ -41,11 +41,16 @@
     "result_file": "gguf_qwen2_5_3b_instruct_q4_k_m.json"
   },
   "economics": {
-    "hardware_cost_usd": 0,
+    "pricing_accessed": "2026-06-20",
+    "api_provider": "OpenAI",
+    "api_model": "GPT-5.4 mini",
+    "hardware_cost_usd": 700,
     "hardware_lifetime_months": 36,
     "electricity_usd_per_kwh": 0.2,
-    "estimated_power_watts": 100,
-    "api_input_usd_per_million_tokens": 0,
-    "api_output_usd_per_million_tokens": 0
+    "estimated_power_watts": 45,
+    "api_input_usd_per_million_tokens": 0.75,
+    "api_cached_input_usd_per_million_tokens": 0.075,
+    "api_output_usd_per_million_tokens": 4.5,
+    "cached_input_fraction": 0.8
   }
 }

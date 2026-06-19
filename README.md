@@ -26,6 +26,7 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |   |-- AIRLLM_RESULTS.md
 |   |-- BASELINE_RESULTS.md
 |   |-- BACKEND_COMPATIBILITY.md
+|   |-- ECONOMIC_ANALYSIS.md
 |   |-- GGUF_RESULTS.md
 |   |-- GGUF_QUANTIZATION_PLAN.md
 |   |-- MEMORY_ESTIMATES.md
@@ -39,12 +40,14 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |   |-- collect_hardware.py
 |   |-- check_backends.py
 |   |-- make_figures.py
+|   |-- run_economics.py
 |   |-- run_airllm.py
 |   |-- run_baseline.py
 |   |-- run_ollama.py
 |   `-- summarize_results.py
 |-- figures/
 |   |-- decode_latency_comparison.svg
+|   |-- cost_break_even.svg
 |   |-- memory_comparison.svg
 |   |-- run_status_summary.svg
 |   `-- throughput_comparison.svg
@@ -215,6 +218,32 @@ uv run python experiments/make_figures.py
 | AirLLM Qwen | Produced no generation; failed after partial sharding with `IndexError`. | AirLLM/model-layout compatibility evidence. |
 | AirLLM Phi-3 backup | Produced no generation; failed because BetterTransformer does not support `phi3`. | Backup-model dependency compatibility evidence. |
 | Ollama GGUF Q4 | Produced a relevant explanation beginning with the requested prefill/decode topic. | Best successful local inference result. |
+
+## Economic Analysis
+
+The cost comparison is generated from explicit assumptions in
+`experiments/run_economics.py`:
+
+```powershell
+uv run python experiments/run_economics.py
+```
+
+The API reference point is OpenAI `GPT-5.4 mini` standard pricing, accessed on
+2026-06-20: $0.75 per 1M input tokens, $0.075 per 1M cached input tokens, and
+$4.50 per 1M output tokens, based on the official OpenAI API pricing page:
+<https://openai.com/api/pricing/>. This is an illustrative external-service
+comparison point, not a claim that the API model is quality-equivalent to the
+local Qwen GGUF model. The local assumptions are a $700 laptop amortized over 36
+months, $0.20/kWh electricity, and a 45 W estimated inference power draw.
+
+For the measured GGUF workload of 23 input tokens and 32 output tokens, the API
+request cost is about $0.000161. The local variable electricity cost is about
+$0.0000085 per request, but the amortized hardware cost is about $19.44 per
+month. Under these assumptions, local inference breaks even at about 127,000
+similar requests per month. With 80% cached input tokens, the API request cost
+falls slightly and break-even moves to about 139,000 requests per month.
+
+![Cost break-even](figures/cost_break_even.svg)
 
 ## Analysis
 

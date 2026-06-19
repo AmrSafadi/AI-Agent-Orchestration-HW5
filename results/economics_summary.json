@@ -1,0 +1,28 @@
+{
+  "assumptions": {
+    "pricing_accessed": "2026-06-20",
+    "api_provider": "OpenAI",
+    "api_model": "GPT-5.4 mini",
+    "api_input_usd_per_1m": 0.75,
+    "api_cached_input_usd_per_1m": 0.075,
+    "api_output_usd_per_1m": 4.5,
+    "cached_input_fraction": 0.8,
+    "hardware_cost_usd": 700.0,
+    "hardware_lifetime_months": 36,
+    "electricity_usd_per_kwh": 0.2,
+    "estimated_power_watts": 45.0
+  },
+  "workload": {
+    "input_tokens": 23,
+    "output_tokens": 32,
+    "runtime_seconds": 3.4027
+  },
+  "costs": {
+    "local_variable_usd_per_request": 8.51e-06,
+    "local_fixed_usd_per_month": 19.4444,
+    "api_usd_per_request": 0.00016125,
+    "api_cached_usd_per_request": 0.00014883,
+    "break_even_requests_per_month": 127301,
+    "cached_break_even_requests_per_month": 138569
+  }
+}

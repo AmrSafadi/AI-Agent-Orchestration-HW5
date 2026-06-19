@@ -83,18 +83,19 @@
 - [x] Generate latency comparison figure.
 - [x] Generate throughput comparison figure.
 - [x] Generate memory comparison figure.
-- [ ] Generate cost break-even figure.
+- [x] Generate cost break-even figure.
 - [x] Add qualitative output comparison table.
 
 ## Phase 8: Economic Analysis
 
-- [ ] Define hardware cost assumptions.
-- [ ] Define electricity price and power estimate.
-- [ ] Define API pricing assumptions with date.
-- [ ] Calculate local cost per request or token volume.
-- [ ] Calculate API cost for the same workload.
-- [ ] Identify break-even point.
-- [ ] Include prompt caching sensitivity if used as the original extension.
+- [x] Create economic analysis note.
+- [x] Define hardware cost assumptions.
+- [x] Define electricity price and power estimate.
+- [x] Define API pricing assumptions with date.
+- [x] Calculate local cost per request or token volume.
+- [x] Calculate API cost for the same workload.
+- [x] Identify break-even point.
+- [x] Include prompt caching sensitivity if used as the original extension.
 
 ## Phase 9: Final Report
 
@@ -106,7 +107,7 @@
 - [ ] Explain Prefill versus Decode in relation to measurements.
 - [ ] Explain compute-bound versus memory-bound behavior.
 - [ ] Explain AirLLM, virtual memory, paging, and mmap.
-- [ ] Add economic conclusion.
+- [x] Add economic conclusion.
 - [ ] Add limitations and recommended usage scenarios.
 - [x] Embed result summary table in `README.md`.
 - [x] Embed Phase 7 figures in `README.md`.
