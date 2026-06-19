@@ -29,10 +29,14 @@
 
 ## Phase 4: Model Selection
 
-- [ ] Choose candidate Hugging Face model.
-- [ ] Check license and format.
+- [x] Choose candidate Hugging Face model.
+- [x] Check preliminary license and format.
+- [x] Create model selection note.
+- [x] Create backend compatibility note.
 - [ ] Estimate memory requirements.
-- [ ] Justify why the model stresses the local machine.
+- [x] Justify why the model stresses the local machine.
+- [ ] Verify installed backend availability without downloading model weights.
+- [ ] Finalize backend-specific model IDs.
 - [ ] Record selected model in config and README.
 
 ## Phase 5: Baseline Experiment
