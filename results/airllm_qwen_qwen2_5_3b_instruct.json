@@ -1,5 +1,5 @@
 {
-  "run_id": "airllm-ef2a077de874",
+  "run_id": "airllm-df98db21d4d9",
   "backend": "airllm",
   "model": "Qwen/Qwen2.5-3B-Instruct",
   "quantization": null,
@@ -14,6 +14,6 @@
   "peak_ram_mb": null,
   "peak_vram_mb": null,
   "output_sample": null,
-  "error": "OSError: [WinError 1314] A required privilege is not held by the client: '..\\\\..\\\\blobs\\\\a6344aac8c09253b3b630fb776ae94478aa0275b' -> 'C:\\\\Users\\\\amrsa\\\\.cache\\\\huggingface\\\\hub\\\\models--Qwen--Qwen2.5-3B-Instruct\\\\snapshots\\\\aa8e72537993ba99e69dfaafa59ed015b17504d1\\\\.gitattributes'",
-  "notes": "AirLLM failed before producing a complete benchmark. Layer shards path: C:\\Users\\amrsa\\OneDrive\\Desktop\\OrchAI\\AI-Agent-Orchestration-HW5\\airllm_cache\\qwen2_5_3b_instruct"
+  "error": "IndexError: list index out of range",
+  "notes": "AirLLM failed before producing a complete benchmark. Layer shards path: C:\\Users\\amrsa\\OneDrive\\Desktop\\OrchAI\\AI-Agent-Orchestration-HW5\\airllm_cache\\qwen2_5_3b_instruct Hugging Face cache path: C:\\Users\\amrsa\\OneDrive\\Desktop\\OrchAI\\AI-Agent-Orchestration-HW5\\model_cache\\huggingface"
 }
