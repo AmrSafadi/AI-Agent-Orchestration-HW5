@@ -4,7 +4,12 @@ version = "0.1.0"
 description = "Local LLM inference benchmark for AirLLM, quantization, and on-prem cost analysis."
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
-dependencies = []
+dependencies = [
+    "accelerate",
+    "psutil",
+    "torch",
+    "transformers",
+]
 
 [tool.uv]
 package = false
@@ -12,4 +17,3 @@ package = false
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-

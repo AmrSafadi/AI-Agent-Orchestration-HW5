@@ -12,6 +12,7 @@
 ## Phase 2: Project Skeleton
 
 - [x] Create Python project metadata.
+- [x] Install minimum Python dependencies for tiny baseline smoke test.
 - [x] Create source package structure.
 - [x] Create experiment script directory.
 - [x] Create config directory and example config.
@@ -41,7 +42,10 @@
 
 ## Phase 5: Baseline Experiment
 
-- [ ] Implement baseline runner.
+- [x] Implement tiny baseline smoke-test runner.
+- [x] Run tiny baseline smoke test with `sshleifer/tiny-gpt2`.
+- [x] Save tiny baseline result to `results/baseline_tiny_gpt2.json`.
+- [ ] Implement Phi-3 baseline runner.
 - [ ] Run fixed prompt with fixed generation settings.
 - [ ] Capture load failure, timeout, or successful output.
 - [ ] Measure runtime, memory, and token statistics where possible.
