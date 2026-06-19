@@ -1,0 +1,26 @@
+{
+  "model": {
+    "id": "to-be-selected-after-hardware-inspection",
+    "license": "to-be-documented",
+    "format": "to-be-documented"
+  },
+  "generation": {
+    "prompt": "Explain the difference between prefill and decode in local LLM inference.",
+    "max_new_tokens": 64,
+    "temperature": 0.2
+  },
+  "paths": {
+    "results_dir": "results",
+    "figures_dir": "figures",
+    "airllm_cache_dir": "airllm_cache"
+  },
+  "economics": {
+    "hardware_cost_usd": 0,
+    "hardware_lifetime_months": 36,
+    "electricity_usd_per_kwh": 0.2,
+    "estimated_power_watts": 100,
+    "api_input_usd_per_million_tokens": 0,
+    "api_output_usd_per_million_tokens": 0
+  }
+}
+

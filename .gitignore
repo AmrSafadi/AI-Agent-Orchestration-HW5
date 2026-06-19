@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Environments
+.venv/
+venv/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Large model/cache artifacts
+models/
+model_cache/
+airllm_cache/
+layer_shards/
+*.safetensors
+*.gguf
+*.bin
+*.pt
+*.pth
+
+# Generated experiment outputs
+results/*.tmp
+figures/*.tmp
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+

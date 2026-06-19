@@ -1,0 +1,44 @@
+{
+  "collected_at_utc": "2026-06-19T07:12:27.195516+00:00",
+  "platform": {
+    "system": "Windows",
+    "release": "11",
+    "version": "10.0.26200",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 142 Stepping 12, GenuineIntel"
+  },
+  "python": {
+    "version": "3.12.13 (main, May 10 2026, 19:35:37) [MSC v.1944 64 bit (AMD64)]",
+    "executable": "C:\\Users\\amrsa\\OneDrive\\Desktop\\OrchAI\\AI-Agent-Orchestration-HW5\\.venv\\Scripts\\python.exe",
+    "implementation": "CPython"
+  },
+  "cpu": {
+    "processor": "Intel64 Family 6 Model 142 Stepping 12, GenuineIntel",
+    "physical_cores": 4,
+    "logical_cores": 8,
+    "name": "Intel(R) Core(TM) i7-10510U CPU @ 1.80GHz"
+  },
+  "memory": {
+    "total_bytes": 16968679424,
+    "total_gb": 15.8
+  },
+  "gpu": [
+    {
+      "name": "Intel(R) UHD Graphics",
+      "vram_total_bytes": 1073741824,
+      "vram_total_gb": 1.0,
+      "driver_version": "30.0.100.9864",
+      "source": "Win32_VideoController"
+    }
+  ],
+  "disks": [
+    {
+      "path": "C:\\",
+      "total_bytes": 506612670464,
+      "used_bytes": 167344250880,
+      "free_bytes": 339268419584,
+      "total_gb": 471.82,
+      "free_gb": 315.97
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+[project]
+name = "airllm-local-benchmark"
+version = "0.1.0"
+description = "Local LLM inference benchmark for AirLLM, quantization, and on-prem cost analysis."
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
