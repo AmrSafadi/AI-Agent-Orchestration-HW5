@@ -14,24 +14,29 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 
 ```text
 .
-├── config/
-│   └── experiment.example.json
-├── docs/
-│   ├── PLAN.md
-│   ├── PRD.md
-│   ├── PRD_benchmarking.md
-│   └── TODO.md
-├── experiments/
-│   └── collect_hardware.py
-├── figures/
-├── materials/
-├── results/
-├── src/
-│   └── airllm_benchmark/
-│       ├── __init__.py
-│       └── hardware.py
-├── pyproject.toml
-└── README.md
+|-- config/
+|   `-- experiment.example.json
+|-- docs/
+|   |-- PLAN.md
+|   |-- PRD.md
+|   |-- PRD_benchmarking.md
+|   `-- TODO.md
+|-- experiments/
+|   |-- collect_hardware.py
+|   `-- run_baseline.py
+|-- figures/
+|-- materials/
+|-- results/
+|-- src/
+|   `-- airllm_benchmark/
+|       |-- __init__.py
+|       |-- hardware.py
+|       |-- metrics.py
+|       `-- runners/
+|           |-- __init__.py
+|           `-- baseline.py
+|-- pyproject.toml
+`-- README.md
 ```
 
 ## Setup
@@ -48,6 +53,23 @@ The command writes hardware information to:
 results/hardware.json
 ```
 
+## Tiny Baseline Smoke Test
+
+The tiny baseline smoke test validates the benchmark pipeline with
+`sshleifer/tiny-gpt2`. This is only a plumbing check for Transformers loading,
+generation, timing, memory sampling, and JSON output. It is not the final model
+for the assignment.
+
+```powershell
+uv run python experiments/run_baseline.py
+```
+
+The command writes the smoke-test benchmark result to:
+
+```text
+results/baseline_tiny_gpt2.json
+```
+
 ## Planned Report Sections
 
 - Hardware specification.
@@ -58,4 +80,3 @@ results/hardware.json
 - Economic comparison: on-prem versus API.
 - Lecture concept analysis: Prefill, Decode, VRAM, paging, and memory-bound behavior.
 - Original extension and conclusions.
-

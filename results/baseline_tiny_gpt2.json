@@ -1,0 +1,19 @@
+{
+  "run_id": "baseline-tiny-gpt2-9732a1109cc6",
+  "backend": "transformers",
+  "model": "sshleifer/tiny-gpt2",
+  "quantization": null,
+  "status": "success",
+  "prompt": "Local LLM benchmarking checks",
+  "input_tokens": 6,
+  "output_tokens": 8,
+  "ttft_seconds": null,
+  "tpot_seconds": 0.0053,
+  "tokens_per_second": 187.4217,
+  "total_runtime_seconds": 20.9425,
+  "peak_ram_mb": 358.49,
+  "peak_vram_mb": null,
+  "output_sample": "stairs stairs stairs stairs stairs stairs stairs stairs",
+  "error": null,
+  "notes": "Tiny GPT-2 validates dependency, loading, generation, and JSON output plumbing. This is not the final assignment model. TTFT is null because this non-streaming smoke test measures total generation only."
+}
