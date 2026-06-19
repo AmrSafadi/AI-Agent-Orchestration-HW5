@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import platform
 import shutil
 import subprocess
@@ -33,7 +34,7 @@ def collect_backend_check() -> BackendCheckReport:
         platform=_platform_info(),
         python=_python_info(),
         commands={
-            "ollama": _command_check("ollama", ["ollama", "--version"]),
+            "ollama": _ollama_command_check(),
             "llama_cpp_cli": _command_check("llama-cli", ["llama-cli", "--version"]),
             "llama_cpp_server": _command_check("llama-server", ["llama-server", "--version"]),
             "nvidia_smi": _command_check("nvidia-smi", ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"]),
@@ -98,6 +99,47 @@ def _command_check(command_name: str, version_command: list[str]) -> dict[str, A
     return result
 
 
+def _ollama_command_check() -> dict[str, Any]:
+    executable = shutil.which("ollama")
+    if executable is None and platform.system() == "Windows":
+        local_app_data = os.environ.get("LOCALAPPDATA")
+        if local_app_data:
+            installed_path = Path(local_app_data) / "Programs" / "Ollama" / "ollama.exe"
+            if installed_path.exists():
+                executable = str(installed_path)
+
+    if executable is None:
+        return _command_check("ollama", ["ollama", "--version"])
+
+    return _command_check_with_executable("ollama", executable, [executable, "--version"])
+
+
+def _command_check_with_executable(
+    command_name: str, executable: str, version_command: list[str]
+) -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "available": True,
+        "executable": executable,
+        "version_command": version_command,
+        "returncode": None,
+        "stdout": None,
+        "stderr": None,
+    }
+    completed = _run(version_command)
+    if completed is None:
+        result["stderr"] = "Command failed to start or timed out."
+        return result
+
+    result.update(
+        {
+            "returncode": completed.returncode,
+            "stdout": completed.stdout.strip() or None,
+            "stderr": completed.stderr.strip() or None,
+        }
+    )
+    return result
+
+
 def _python_import_check(module_name: str) -> dict[str, Any]:
     spec = importlib.util.find_spec(module_name)
     result: dict[str, Any] = {
@@ -125,4 +167,3 @@ def _run(command: list[str]) -> subprocess.CompletedProcess[str] | None:
         return subprocess.run(command, capture_output=True, check=False, text=True, timeout=15)
     except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
         return None
-

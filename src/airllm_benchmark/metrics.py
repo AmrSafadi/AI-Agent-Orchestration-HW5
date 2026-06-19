@@ -69,6 +69,54 @@ class ProcessMemorySampler:
         self._peak_rss_bytes = max(self._peak_rss_bytes, rss)
 
 
+class ChildProcessMemorySampler:
+    """Sample RSS for a child process and its descendants from the parent process."""
+
+    def __init__(self, pid: int, interval_seconds: float = 0.1) -> None:
+        self._interval_seconds = interval_seconds
+        self._pid = pid
+        self._peak_rss_bytes = 0
+        self._stop_event = threading.Event()
+        self._thread = threading.Thread(target=self._sample_loop, daemon=True)
+
+    def __enter__(self) -> "ChildProcessMemorySampler":
+        self._thread.start()
+        return self
+
+    def __exit__(self, *_exc: object) -> None:
+        self._record_current_rss()
+        self._stop_event.set()
+        self._thread.join(timeout=1)
+        self._record_current_rss()
+
+    @property
+    def peak_ram_mb(self) -> float | None:
+        if self._peak_rss_bytes <= 0:
+            return None
+        return round(self._peak_rss_bytes / (1024**2), 2)
+
+    def _sample_loop(self) -> None:
+        while not self._stop_event.is_set():
+            self._record_current_rss()
+            time.sleep(self._interval_seconds)
+
+    def _record_current_rss(self) -> None:
+        try:
+            process = psutil.Process(self._pid)
+            processes = [process] + process.children(recursive=True)
+            rss = sum(_rss_bytes(child) for child in processes)
+        except psutil.Error:
+            return
+        self._peak_rss_bytes = max(self._peak_rss_bytes, rss)
+
+
+def _rss_bytes(process: psutil.Process) -> int:
+    try:
+        return process.memory_info().rss
+    except psutil.Error:
+        return 0
+
+
 def new_run_id(prefix: str) -> str:
     """Create a compact traceable run ID."""
 
@@ -100,4 +148,3 @@ def compact_notes(parts: list[str | None]) -> str:
     """Join optional note fragments."""
 
     return " ".join(part for part in parts if part)
-

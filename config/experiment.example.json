@@ -1,12 +1,20 @@
 {
   "model": {
-    "id": "to-be-selected-after-hardware-inspection",
-    "license": "to-be-documented",
-    "format": "to-be-documented"
+    "id": "Qwen/Qwen2.5-3B-Instruct",
+    "role": "main_hf_airllm_candidate",
+    "license": "qwen-research",
+    "format": "Hugging Face SafeTensors / BF16"
+  },
+  "candidate_models": {
+    "pipeline_validation": "sshleifer/tiny-gpt2",
+    "main_hf_airllm_candidate": "Qwen/Qwen2.5-3B-Instruct",
+    "main_gguf_quantized_candidate": "Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M",
+    "backup_hf_candidate": "microsoft/Phi-3-mini-4k-instruct",
+    "deferred_too_large_candidate": "Qwen/Qwen2.5-7B-Instruct"
   },
   "generation": {
     "prompt": "Explain the difference between prefill and decode in local LLM inference.",
-    "max_new_tokens": 64,
+    "max_new_tokens": 32,
     "temperature": 0.2
   },
   "paths": {
@@ -14,13 +22,35 @@
     "figures_dir": "figures",
     "airllm_cache_dir": "airllm_cache"
   },
+  "airllm": {
+    "enabled": false,
+    "model_id": "Qwen/Qwen2.5-3B-Instruct",
+    "huggingface_cache_dir": "model_cache/huggingface",
+    "layer_shards_saving_path": "airllm_cache/qwen2_5_3b_instruct",
+    "compression": null,
+    "delete_original": false,
+    "timeout_seconds": 1800,
+    "result_file": "airllm_qwen_qwen2_5_3b_instruct.json"
+  },
+  "gguf": {
+    "enabled": false,
+    "backend": "ollama",
+    "model_id": "hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M",
+    "quantization": "Q4_K_M",
+    "timeout_seconds": 900,
+    "result_file": "gguf_qwen2_5_3b_instruct_q4_k_m.json"
+  },
   "economics": {
-    "hardware_cost_usd": 0,
+    "pricing_accessed": "2026-06-20",
+    "api_provider": "OpenAI",
+    "api_model": "GPT-5.4 mini",
+    "hardware_cost_usd": 700,
     "hardware_lifetime_months": 36,
     "electricity_usd_per_kwh": 0.2,
-    "estimated_power_watts": 100,
-    "api_input_usd_per_million_tokens": 0,
-    "api_output_usd_per_million_tokens": 0
+    "estimated_power_watts": 45,
+    "api_input_usd_per_million_tokens": 0.75,
+    "api_cached_input_usd_per_million_tokens": 0.075,
+    "api_output_usd_per_million_tokens": 4.5,
+    "cached_input_fraction": 0.8
   }
 }
-

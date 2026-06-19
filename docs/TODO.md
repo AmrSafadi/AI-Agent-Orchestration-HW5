@@ -34,64 +34,84 @@
 - [x] Check preliminary license and format.
 - [x] Create model selection note.
 - [x] Create backend compatibility note.
-- [ ] Estimate memory requirements.
+- [x] Estimate memory requirements.
 - [x] Justify why the model stresses the local machine.
 - [x] Verify installed backend availability without downloading model weights.
-- [ ] Finalize backend-specific model IDs.
-- [ ] Record selected model in config and README.
+- [x] Finalize backend-specific model IDs.
+- [x] Record selected model in config and README.
 
 ## Phase 5: Baseline Experiment
 
 - [x] Implement tiny baseline smoke-test runner.
 - [x] Run tiny baseline smoke test with `sshleifer/tiny-gpt2`.
 - [x] Save tiny baseline result to `results/baseline_tiny_gpt2.json`.
-- [ ] Implement Phi-3 baseline runner.
-- [ ] Run fixed prompt with fixed generation settings.
-- [ ] Capture load failure, timeout, or successful output.
+- [x] Implement Qwen 3B baseline runner.
+- [x] Run fixed prompt with fixed generation settings.
+- [x] Capture load failure, timeout, or successful output.
 - [ ] Measure runtime, memory, and token statistics where possible.
-- [ ] Save raw baseline results.
+- [x] Save raw baseline results.
 - [ ] Add baseline screenshots or terminal evidence if useful.
 
 ## Phase 6: AirLLM Experiment
 
-- [ ] Install and verify AirLLM dependencies.
-- [ ] Configure model shard/cache path.
-- [ ] Implement AirLLM runner.
-- [ ] Run the same prompt and generation settings.
+- [x] Create AirLLM experiment plan.
+- [x] Configure planned model shard/cache path.
+- [x] Install and verify AirLLM dependencies.
+- [x] Implement AirLLM runner.
+- [x] Run the same prompt and generation settings.
+- [x] Run AirLLM backup model attempt.
 - [ ] Test quantization settings supported by the environment.
-- [ ] Save raw AirLLM results.
+- [x] Save raw AirLLM results.
+
+## Phase 6B: Quantized GGUF Experiment
+
+- [x] Create GGUF quantization plan.
+- [x] Select recommended quantized model candidate.
+- [x] Select preferred GGUF backend path.
+- [x] Install approved GGUF backend.
+- [x] Verify GGUF backend availability.
+- [x] Download approved quantized GGUF model.
+- [x] Implement GGUF/Ollama benchmark runner or wrapper.
+- [x] Run the same prompt and generation settings.
+- [x] Save raw quantized GGUF result.
+- [x] Compare GGUF result against baseline and AirLLM attempts.
 
 ## Phase 7: Analysis and Figures
 
-- [ ] Implement result loading and summary table generation.
-- [ ] Generate latency comparison figure.
-- [ ] Generate throughput comparison figure.
-- [ ] Generate memory comparison figure.
-- [ ] Generate cost break-even figure.
-- [ ] Add qualitative output comparison table.
+- [x] Implement result loading and summary table generation.
+- [x] Add result summary table from existing JSON files.
+- [x] Generate latency comparison figure.
+- [x] Generate throughput comparison figure.
+- [x] Generate memory comparison figure.
+- [x] Generate cost break-even figure.
+- [x] Add qualitative output comparison table.
 
 ## Phase 8: Economic Analysis
 
-- [ ] Define hardware cost assumptions.
-- [ ] Define electricity price and power estimate.
-- [ ] Define API pricing assumptions with date.
-- [ ] Calculate local cost per request or token volume.
-- [ ] Calculate API cost for the same workload.
-- [ ] Identify break-even point.
-- [ ] Include prompt caching sensitivity if used as the original extension.
+- [x] Create economic analysis note.
+- [x] Define hardware cost assumptions.
+- [x] Define electricity price and power estimate.
+- [x] Define API pricing assumptions with date.
+- [x] Calculate local cost per request or token volume.
+- [x] Calculate API cost for the same workload.
+- [x] Identify break-even point.
+- [x] Include prompt caching sensitivity if used as the original extension.
 
 ## Phase 9: Final Report
 
+- [x] Refresh `docs/PLAN.md` to match the current repository.
 - [ ] Write hardware documentation section.
 - [ ] Write model choice justification.
-- [ ] Write baseline analysis.
-- [ ] Write AirLLM and quantization analysis.
+- [x] Write baseline analysis.
+- [x] Write AirLLM and quantization analysis.
 - [ ] Explain Prefill versus Decode in relation to measurements.
 - [ ] Explain compute-bound versus memory-bound behavior.
 - [ ] Explain AirLLM, virtual memory, paging, and mmap.
-- [ ] Add economic conclusion.
+- [x] Add economic conclusion.
 - [ ] Add limitations and recommended usage scenarios.
-- [ ] Embed tables, figures, and screenshots in `README.md`.
+- [x] Embed result summary table in `README.md`.
+- [x] Embed Phase 7 figures in `README.md`.
+- [ ] Embed screenshots in `README.md` if useful.
 
 ## Phase 10: Verification
 

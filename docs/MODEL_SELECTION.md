@@ -2,9 +2,12 @@
 
 ## Purpose
 
-This note documents the model-selection decision before downloading any model weights. The goal is to choose models that match the assignment requirements while respecting the limits of the local machine.
+This note documents the model-selection decision before downloading any model
+weights. The goal is to choose a model that matches the assignment requirement:
+large enough to stress the local machine, but not so large that there is no
+realistic chance of running the experiment even with AirLLM and quantization.
 
-No large model weights should be downloaded until backend compatibility and disk/cache paths are checked.
+No large model weights are downloaded as part of this decision note.
 
 ## Hardware Summary
 
@@ -22,42 +25,73 @@ The hardware inspection in `results/hardware.json` reports:
 
 ## Hardware Interpretation
 
-This is a laptop-class CPU system with limited integrated graphics rather than a workstation GPU. The CPU can run small inference jobs, but it is not designed for high-throughput transformer inference. The GPU is Intel integrated graphics with only about 1 GB of reported VRAM, so it is not useful for normal CUDA-based local LLM inference.
+This is a laptop-class CPU system with limited integrated graphics rather than a
+workstation GPU. The CPU can run small inference jobs, but it is not designed
+for high-throughput transformer inference. The GPU is Intel integrated graphics
+with only about 1 GB of reported VRAM, so it is not useful for normal CUDA-based
+local LLM inference.
 
-The available disk space is acceptable for experimentation, but model downloads and AirLLM layer shard/cache files must still be managed carefully. AirLLM can create many large files, so cache locations should be explicit and monitored.
+The main constraint is system RAM and memory bandwidth. Local LLM inference
+requires memory for model weights, tokenizer and runtime overhead, temporary
+activations, KV cache, backend buffers, and the operating system. Once memory
+pressure rises, Windows may page data to disk, which can turn a technically
+running experiment into an unusably slow one.
 
-## Why This Machine Is Memory-Limited
+## Why 7B Is Deferred
 
-The main constraint is memory, not just raw compute. Local LLM inference requires memory for:
+A normal 7B model in full precision is too risky as the main target for this
+machine. Approximate model-weight memory alone is:
 
-- Model weights.
-- Tokenizer and runtime overhead.
-- Intermediate activations.
-- The KV cache created during generation.
-- Backend framework overhead.
+| Format | Approximate weight memory |
+| --- | --- |
+| FP32 | About 28 GB for 7B parameters |
+| FP16 / BF16 | About 14 GB for 7B parameters |
 
-With only 15.8 GB of system RAM and no practical dedicated VRAM, the machine has little room for a full-precision multi-billion-parameter model. Once RAM pressure rises, Windows may page data to disk. Paging can make a run technically continue, but latency becomes very high because disk I/O is much slower than RAM.
+The FP16/BF16 estimate already approaches the full 15.8 GB physical RAM before
+counting Python, framework allocations, token buffers, KV cache, and the
+operating system. A direct full-load 7B run would likely fail, trigger heavy
+paging, or run with unusable latency.
 
-This makes the machine a useful fit for the assignment: direct local inference is expected to expose memory bottlenecks, while AirLLM can be evaluated as a memory-saving strategy that trades speed for feasibility.
+The assignment asks for a model that is large but not impossibly large. For this
+machine, 7B is useful as a documented rejected/deferred boundary, but not as the
+first large download.
 
-## Why A Full-Precision 7B Model Is Probably Too Heavy
+## Selected Main Model
 
-A normal 7B model in full precision is likely too heavy for this machine. Approximate model-weight memory alone is:
+```text
+Qwen/Qwen2.5-3B-Instruct
+```
 
-- FP32: about 28 GB for 7B parameters.
-- FP16/BF16: about 14 GB for 7B parameters.
+Role:
 
-The FP16 estimate already approaches the full physical RAM of the machine before counting runtime overhead, token buffers, Python process memory, framework allocations, and KV cache. In practice, a direct full-precision 7B load would likely fail, trigger heavy paging, or run with unusable latency.
+- Main Hugging Face/SafeTensors candidate for direct baseline and AirLLM.
+- Large enough to stress 15.8 GB RAM through the Python/Transformers stack.
+- More realistic than a full 7B direct-load attempt.
+- Same family as a matching GGUF quantized repository.
 
-Quantized formats reduce the weight memory significantly, but quantization does not remove all overhead. This is why a direct baseline with a 7B-class model is expected to be challenging, and why the experiment should be staged carefully.
+The Qwen model card reports 3.09B parameters. BF16 weights are roughly 6.2 GB
+before runtime overhead, KV cache, tokenizer files, and operating-system memory.
+That should create meaningful pressure on this laptop without making the first
+experiment an avoidable endurance test.
 
-## Safer Two-Model Strategy
+## Quantized Comparison Candidate
 
-The safer approach is to use two models with different roles.
+```text
+Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M
+```
 
-### A. Smoke-Test Model
+Role:
 
-Candidate:
+- Optional quantized local comparison through Ollama or llama.cpp if approved.
+- Demonstrates how quantization changes disk size, memory pressure, and
+  latency.
+- Keeps the experiment in the same model family as the direct HF/AirLLM target.
+
+The GGUF model card lists Q4_K_M at about 2.1 GB. That is much more practical
+for local CPU inference than a full-precision 7B model, though throughput is
+still expected to be limited by the laptop CPU.
+
+## Backup Candidate
 
 ```text
 microsoft/Phi-3-mini-4k-instruct
@@ -65,48 +99,52 @@ microsoft/Phi-3-mini-4k-instruct
 
 Role:
 
-- Validate the benchmark pipeline before using a larger model.
-- Check prompt handling, token counting, timing, result serialization, and memory logging.
-- Reduce debugging time because the model is smaller than a 7B-class model.
-- Confirm that the selected backend path works before spending time on large downloads or AirLLM cache generation.
+- Backup HF/Transformers candidate if Qwen 3B has compatibility problems.
+- Still a 3B-4B class model that can stress the local machine.
 
-This model is not the main stress-test evidence for the assignment. It is a practical engineering step to prove the scripts and measurements work.
+Phi-3 Mini is 3.8B parameters, so it is slightly larger than Qwen 3B. It remains
+a strong backup, but Qwen 3B gives a cleaner path across HF/SafeTensors, AirLLM,
+and matching GGUF quantization.
 
-### B. Main Stress-Test Model
-
-Candidate:
+## Completed Pipeline Validation Model
 
 ```text
-Qwen/Qwen2.5-7B-Instruct-GGUF
+sshleifer/tiny-gpt2
 ```
 
 Role:
 
-- Provide the main assignment stress test.
-- Represent a 7B-class model that is plausibly too large for comfortable direct local execution on this hardware.
-- Support the required analysis of memory pressure, latency, quantization, and local/on-prem tradeoffs.
-- Give a realistic case where quantization and model format choices matter.
+- Validate Transformers loading, tokenization, generation, timing, memory
+  sampling, and JSON result writing.
+- Confirm the local benchmark plumbing before any large model download.
 
-The GGUF format is especially relevant for local inference tooling such as Ollama or llama.cpp-style runners. However, AirLLM compatibility must be checked carefully because AirLLM workflows may expect Hugging Face/SafeTensors-style model layouts rather than GGUF files.
+This model already ran successfully and is not the assignment model.
 
-## Compatibility Caveat
+## Deferred / Rejected Candidate
 
-The final model choice may still change after checking exact backend compatibility with:
+```text
+Qwen/Qwen2.5-7B-Instruct
+```
 
-- Ollama.
-- Hugging Face Transformers.
-- AirLLM.
+Role:
 
-The important decision at this stage is the strategy, not a final irreversible download. The project should first confirm which formats and model families are supported by each backend, then choose the smallest set of downloads that supports the baseline, AirLLM, quantization, and reporting requirements.
+- Documented as too risky for this laptop as the main direct-load target.
+- May be discussed in the report as a model-size boundary that exceeds the
+  practical comfort zone of the available hardware.
+
+The 7B model is not selected for the first large download.
 
 ## Current Decision
 
-Proceed with a two-model plan:
+Proceed with a Qwen 3B-centered plan:
 
 | Role | Candidate model | Purpose |
 | --- | --- | --- |
-| Smoke test | `microsoft/Phi-3-mini-4k-instruct` | Validate benchmark scripts and measurement pipeline |
-| Main stress test | `Qwen/Qwen2.5-7B-Instruct-GGUF` | Demonstrate memory-limited local inference and quantization tradeoffs |
+| Completed pipeline validation | `sshleifer/tiny-gpt2` | Prove the local Transformers measurement pipeline works |
+| Main HF/AirLLM candidate | `Qwen/Qwen2.5-3B-Instruct` | Stress local RAM while staying plausible for AirLLM |
+| Quantized GGUF candidate | `Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` | Compare quantized local inference if a GGUF backend is approved |
+| Backup HF candidate | `microsoft/Phi-3-mini-4k-instruct` | Alternative 3B-4B class model |
+| Deferred as too large | `Qwen/Qwen2.5-7B-Instruct` | Documented but not selected for first download |
 
 No model weights are downloaded as part of this decision note.
 

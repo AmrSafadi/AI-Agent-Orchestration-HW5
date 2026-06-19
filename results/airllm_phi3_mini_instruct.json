@@ -1,0 +1,19 @@
+{
+  "run_id": "airllm-3b7fab1a2416",
+  "backend": "airllm",
+  "model": "microsoft/Phi-3-mini-4k-instruct",
+  "quantization": null,
+  "status": "failed",
+  "prompt": "Explain the difference between prefill and decode in local LLM inference.",
+  "input_tokens": null,
+  "output_tokens": null,
+  "ttft_seconds": null,
+  "tpot_seconds": null,
+  "tokens_per_second": null,
+  "total_runtime_seconds": null,
+  "peak_ram_mb": null,
+  "peak_vram_mb": null,
+  "output_sample": null,
+  "error": "NotImplementedError: The model type phi3 is not yet supported to be used with BetterTransformer. Feel free to open an issue at https://github.com/huggingface/optimum/issues if you would like this model type to be supported. Currently supported models are: dict_keys(['albert', 'bark', 'bart', 'bert', 'bert-generation', 'blenderbot', 'bloom', 'camembert', 'blip-2', 'clip', 'codegen', 'data2vec-text', 'deit', 'distilbert', 'electra', 'ernie', 'fsmt', 'gpt2', 'gptj', 'gpt_neo', 'gpt_neox', 'hubert', 'layoutlm', 'm2m_100', 'marian', 'markuplm', 'mbart', 'opt', 'pegasus', 'rembert', 'prophetnet', 'roberta', 'roc_bert', 'roformer', 'splinter', 'tapas', 't5', 'vilt', 'vit', 'vit_mae', 'vit_msn', 'wav2vec2', 'xlm-roberta', 'yolos']).",
+  "notes": "AirLLM failed before producing a complete benchmark. Layer shards path: airllm_cache\\phi3_mini_instruct Hugging Face cache path: C:\\Users\\amrsa\\OneDrive\\Desktop\\OrchAI\\AI-Agent-Orchestration-HW5\\model_cache\\huggingface"
+}

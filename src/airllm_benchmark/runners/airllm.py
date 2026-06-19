@@ -1,8 +1,10 @@
-"""Transformers baseline runners."""
+"""AirLLM benchmark runner."""
 
 from __future__ import annotations
 
 import multiprocessing as mp
+import os
+import sys
 import time
 from pathlib import Path
 from queue import Empty
@@ -18,84 +20,48 @@ from airllm_benchmark.metrics import (
     write_benchmark_result,
 )
 
-TINY_GPT2_MODEL = "sshleifer/tiny-gpt2"
-DEFAULT_PROMPT = "Local LLM benchmarking checks"
-DEFAULT_MAX_NEW_TOKENS = 8
-DEFAULT_TIMEOUT_SECONDS = 900
+DEFAULT_AIRLLM_TIMEOUT_SECONDS = 1800
 
 
-def run_tiny_gpt2_baseline(output_path: Path) -> BenchmarkResult:
-    """Run a very small Transformers generation to validate benchmark plumbing."""
-
-    run_id = new_run_id("baseline-tiny-gpt2")
-    try:
-        result = _run_transformers_success_path(
-            run_id=run_id,
-            model_id=TINY_GPT2_MODEL,
-            prompt=DEFAULT_PROMPT,
-            max_new_tokens=DEFAULT_MAX_NEW_TOKENS,
-            temperature=0.0,
-            local_files_only=False,
-            notes_prefix=[
-                "Tiny GPT-2 validates dependency, loading, generation, and JSON output plumbing.",
-                "This is not the final assignment model.",
-            ],
-        )
-    except Exception as exc:  # pragma: no cover - depends on external model access
-        result = BenchmarkResult(
-            run_id=run_id,
-            backend="transformers",
-            model=TINY_GPT2_MODEL,
-            quantization=None,
-            status="failed",
-            prompt=DEFAULT_PROMPT,
-            input_tokens=None,
-            output_tokens=None,
-            ttft_seconds=None,
-            tpot_seconds=None,
-            tokens_per_second=None,
-            total_runtime_seconds=None,
-            peak_ram_mb=None,
-            peak_vram_mb=None,
-            output_sample=None,
-            error=error_text(exc),
-            notes="Tiny smoke-test failed before producing a complete benchmark.",
-        )
-
-    write_benchmark_result(result, output_path)
-    return result
-
-
-def run_transformers_baseline(
+def run_airllm_baseline(
     output_path: Path,
     *,
     model_id: str,
     prompt: str,
     max_new_tokens: int,
     temperature: float,
-    local_files_only: bool = True,
-    timeout_seconds: int | None = DEFAULT_TIMEOUT_SECONDS,
+    layer_shards_saving_path: Path,
+    huggingface_cache_dir: Path,
+    compression: str | None,
+    delete_original: bool,
+    timeout_seconds: int | None = DEFAULT_AIRLLM_TIMEOUT_SECONDS,
 ) -> BenchmarkResult:
-    """Run a configurable Transformers baseline with failure and timeout capture."""
+    """Run AirLLM with timeout and failure capture."""
 
-    run_id = new_run_id("baseline-transformers")
+    run_id = new_run_id("airllm")
     if timeout_seconds is None:
-        result = _run_transformers_with_error_capture(
+        result = _run_airllm_with_error_capture(
             run_id=run_id,
             model_id=model_id,
             prompt=prompt,
             max_new_tokens=max_new_tokens,
             temperature=temperature,
-            local_files_only=local_files_only,
+            layer_shards_saving_path=layer_shards_saving_path,
+            huggingface_cache_dir=huggingface_cache_dir,
+            compression=compression,
+            delete_original=delete_original,
         )
     else:
-        result = _run_transformers_with_timeout(
+        result = _run_airllm_with_timeout(
             run_id=run_id,
             model_id=model_id,
             prompt=prompt,
             max_new_tokens=max_new_tokens,
             temperature=temperature,
-            local_files_only=local_files_only,
+            layer_shards_saving_path=layer_shards_saving_path,
+            huggingface_cache_dir=huggingface_cache_dir,
+            compression=compression,
+            delete_original=delete_original,
             timeout_seconds=timeout_seconds,
         )
 
@@ -103,19 +69,22 @@ def run_transformers_baseline(
     return result
 
 
-def _run_transformers_with_timeout(
+def _run_airllm_with_timeout(
     *,
     run_id: str,
     model_id: str,
     prompt: str,
     max_new_tokens: int,
     temperature: float,
-    local_files_only: bool,
+    layer_shards_saving_path: Path,
+    huggingface_cache_dir: Path,
+    compression: str | None,
+    delete_original: bool,
     timeout_seconds: int,
 ) -> BenchmarkResult:
     queue: mp.Queue[BenchmarkResult] = mp.Queue(maxsize=1)
     process = mp.Process(
-        target=_run_transformers_worker,
+        target=_run_airllm_worker,
         kwargs={
             "queue": queue,
             "run_id": run_id,
@@ -123,7 +92,10 @@ def _run_transformers_with_timeout(
             "prompt": prompt,
             "max_new_tokens": max_new_tokens,
             "temperature": temperature,
-            "local_files_only": local_files_only,
+            "layer_shards_saving_path": layer_shards_saving_path,
+            "huggingface_cache_dir": huggingface_cache_dir,
+            "compression": compression,
+            "delete_original": delete_original,
         },
     )
     process.start()
@@ -137,9 +109,9 @@ def _run_transformers_with_timeout(
         peak_ram_mb = memory.peak_ram_mb or peak_ram_mb
         return BenchmarkResult(
             run_id=run_id,
-            backend="transformers",
+            backend="airllm",
             model=model_id,
-            quantization=None,
+            quantization=compression,
             status="timeout",
             prompt=prompt,
             input_tokens=None,
@@ -154,8 +126,9 @@ def _run_transformers_with_timeout(
             error=f"Timed out after {timeout_seconds} seconds.",
             notes=compact_notes(
                 [
-                    "The baseline worker was terminated after exceeding the configured timeout.",
-                    _download_note(local_files_only),
+                    "The AirLLM worker was terminated after exceeding the configured timeout.",
+                    f"Layer shards path: {layer_shards_saving_path}",
+                    f"Hugging Face cache path: {huggingface_cache_dir}",
                 ]
             ),
         )
@@ -165,9 +138,9 @@ def _run_transformers_with_timeout(
     except Empty:
         return BenchmarkResult(
             run_id=run_id,
-            backend="transformers",
+            backend="airllm",
             model=model_id,
-            quantization=None,
+            quantization=compression,
             status="failed",
             prompt=prompt,
             input_tokens=None,
@@ -180,11 +153,11 @@ def _run_transformers_with_timeout(
             peak_vram_mb=None,
             output_sample=None,
             error=f"Worker exited with code {process.exitcode} before returning a result.",
-            notes=_download_note(local_files_only),
+            notes=f"Layer shards path: {layer_shards_saving_path}",
         )
 
 
-def _run_transformers_worker(
+def _run_airllm_worker(
     *,
     queue: mp.Queue[BenchmarkResult],
     run_id: str,
@@ -192,44 +165,55 @@ def _run_transformers_worker(
     prompt: str,
     max_new_tokens: int,
     temperature: float,
-    local_files_only: bool,
+    layer_shards_saving_path: Path,
+    huggingface_cache_dir: Path,
+    compression: str | None,
+    delete_original: bool,
 ) -> None:
-    result = _run_transformers_with_error_capture(
+    result = _run_airllm_with_error_capture(
         run_id=run_id,
         model_id=model_id,
         prompt=prompt,
         max_new_tokens=max_new_tokens,
         temperature=temperature,
-        local_files_only=local_files_only,
+        layer_shards_saving_path=layer_shards_saving_path,
+        huggingface_cache_dir=huggingface_cache_dir,
+        compression=compression,
+        delete_original=delete_original,
     )
     queue.put(result)
 
 
-def _run_transformers_with_error_capture(
+def _run_airllm_with_error_capture(
     *,
     run_id: str,
     model_id: str,
     prompt: str,
     max_new_tokens: int,
     temperature: float,
-    local_files_only: bool,
+    layer_shards_saving_path: Path,
+    huggingface_cache_dir: Path,
+    compression: str | None,
+    delete_original: bool,
 ) -> BenchmarkResult:
     try:
-        return _run_transformers_success_path(
+        return _run_airllm_success_path(
             run_id=run_id,
             model_id=model_id,
             prompt=prompt,
             max_new_tokens=max_new_tokens,
             temperature=temperature,
-            local_files_only=local_files_only,
-            notes_prefix=None,
+            layer_shards_saving_path=layer_shards_saving_path,
+            huggingface_cache_dir=huggingface_cache_dir,
+            compression=compression,
+            delete_original=delete_original,
         )
-    except Exception as exc:  # pragma: no cover - depends on model/backend behavior
+    except Exception as exc:  # pragma: no cover - depends on AirLLM/model behavior
         return BenchmarkResult(
             run_id=run_id,
-            backend="transformers",
+            backend="airllm",
             model=model_id,
-            quantization=None,
+            quantization=compression,
             status="failed",
             prompt=prompt,
             input_tokens=None,
@@ -244,37 +228,43 @@ def _run_transformers_with_error_capture(
             error=error_text(exc),
             notes=compact_notes(
                 [
-                    "Transformers baseline failed before producing a complete benchmark.",
-                    _download_note(local_files_only),
+                    "AirLLM failed before producing a complete benchmark.",
+                    f"Layer shards path: {layer_shards_saving_path}",
+                    f"Hugging Face cache path: {huggingface_cache_dir}",
                 ]
             ),
         )
 
 
-def _run_transformers_success_path(
+def _run_airllm_success_path(
     *,
     run_id: str,
     model_id: str,
     prompt: str,
     max_new_tokens: int,
     temperature: float,
-    local_files_only: bool,
-    notes_prefix: list[str] | None,
+    layer_shards_saving_path: Path,
+    huggingface_cache_dir: Path,
+    compression: str | None,
+    delete_original: bool,
 ) -> BenchmarkResult:
     import torch
-    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from airllm import AutoModel
 
+    _configure_huggingface_cache(huggingface_cache_dir)
+    layer_shards_saving_path.mkdir(parents=True, exist_ok=True)
     start = time.perf_counter()
     with ProcessMemorySampler() as memory:
-        tokenizer = AutoTokenizer.from_pretrained(model_id, local_files_only=local_files_only)
-        model = AutoModelForCausalLM.from_pretrained(
+        model = AutoModel.from_pretrained(
             model_id,
-            local_files_only=local_files_only,
-            torch_dtype="auto",
-            low_cpu_mem_usage=True,
+            device="cpu",
+            dtype=torch.float32,
+            layer_shards_saving_path=str(layer_shards_saving_path),
+            compression=compression,
+            delete_original=delete_original,
+            prefetching=False,
         )
-        model.eval()
-
+        tokenizer = model.tokenizer
         inputs = tokenizer(prompt, return_tensors="pt")
         input_tokens = int(inputs["input_ids"].shape[-1])
 
@@ -290,7 +280,7 @@ def _run_transformers_success_path(
 
         generation_start = time.perf_counter()
         with torch.no_grad():
-            output_ids = model.generate(**inputs, **generation_kwargs)
+            output_ids = model.generate(inputs["input_ids"], **generation_kwargs)
         generation_seconds = time.perf_counter() - generation_start
         total_seconds = time.perf_counter() - start
 
@@ -300,18 +290,11 @@ def _run_transformers_success_path(
     tokens_per_second = output_tokens / generation_seconds if generation_seconds > 0 else None
     tpot_seconds = generation_seconds / output_tokens if output_tokens else None
 
-    notes = compact_notes(
-        (notes_prefix or [])
-        + [
-            "TTFT is null because this non-streaming baseline measures total generation only.",
-            _download_note(local_files_only),
-        ]
-    )
     return BenchmarkResult(
         run_id=run_id,
-        backend="transformers",
+        backend="airllm",
         model=model_id,
-        quantization=None,
+        quantization=compression,
         status="success",
         prompt=prompt,
         input_tokens=input_tokens,
@@ -324,11 +307,34 @@ def _run_transformers_success_path(
         peak_vram_mb=None,
         output_sample=output_text,
         error=None,
-        notes=notes,
+        notes=compact_notes(
+            [
+                "TTFT is null because this non-streaming AirLLM runner measures total generation only.",
+                f"Layer shards path: {layer_shards_saving_path}",
+                f"Hugging Face cache path: {huggingface_cache_dir}",
+                f"Compression: {compression or 'none'}",
+            ]
+        ),
     )
 
 
-def _download_note(local_files_only: bool) -> str:
-    if local_files_only:
-        return "Transformers was run with local_files_only=True to prevent model downloads."
-    return "Transformers was allowed to use the network/cache according to its default behavior."
+def _configure_huggingface_cache(cache_dir: Path) -> None:
+    """Use a project-local Hugging Face cache and avoid Windows symlink privileges."""
+
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    hub_cache_dir = cache_dir / "hub"
+    hub_cache_dir.mkdir(parents=True, exist_ok=True)
+
+    os.environ["HF_HOME"] = str(cache_dir)
+    os.environ["HF_HUB_CACHE"] = str(hub_cache_dir)
+    os.environ["TRANSFORMERS_CACHE"] = str(hub_cache_dir)
+    os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+
+    import huggingface_hub.constants as hf_constants
+    import huggingface_hub.file_download as hf_file_download
+
+    hf_constants.HF_HOME = str(cache_dir)
+    hf_constants.HF_HUB_CACHE = str(hub_cache_dir)
+
+    if sys.platform == "win32":
+        hf_file_download.are_symlinks_supported = lambda cache_dir=None: False

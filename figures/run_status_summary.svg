@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="420"
+viewBox="0 0 920 420">
+<style>
+  .title { font: 700 26px Arial, sans-serif; fill: #1a202c; }
+  .subtitle { font: 15px Arial, sans-serif; fill: #4a5568; }
+  .label { font: 15px Arial, sans-serif; fill: #2d3748; }
+  .value { font: 15px Arial, sans-serif; fill: #1a202c; }
+  .note { font: 14px Arial, sans-serif; fill: #4a5568; }
+  .missing { fill: #e2e8f0; }
+  .status { font: 700 16px Arial, sans-serif; fill: #1a202c; }
+  .cardlabel { font: 14px Arial, sans-serif; fill: #2d3748; }
+  .small { font: 12px Arial, sans-serif; fill: #4a5568; }
+</style>
+<rect width="100%" height="100%" fill="#f7fafc"/>
+<text x="24" y="38" class="title">Run status summary</text>
+<text x="24" y="62" class="subtitle">Completed, timed out, and failed runs</text>
+<rect x="58" y="96" width="150" height="190" rx="4" fill="#ffffff" stroke="#cbd5e0"/>
+<circle cx="133" cy="150" r="28" fill="#2f855a" />
+<text x="133" y="199" class="status" text-anchor="middle">success</text>
+<text x="133" y="232" class="cardlabel" text-anchor="middle">Tiny GPT-2</text>
+<text x="133" y="260" class="small" text-anchor="middle">8 output tokens</text>
+<rect x="230" y="96" width="150" height="190" rx="4" fill="#ffffff" stroke="#cbd5e0"/>
+<circle cx="305" cy="150" r="28" fill="#b7791f" />
+<text x="305" y="199" class="status" text-anchor="middle">timeout</text>
+<text x="305" y="232" class="cardlabel" text-anchor="middle">Qwen HF</text>
+<text x="305" y="260" class="small" text-anchor="middle">900 s timeout</text>
+<rect x="402" y="96" width="150" height="190" rx="4" fill="#ffffff" stroke="#cbd5e0"/>
+<circle cx="477" cy="150" r="28" fill="#c53030" />
+<text x="477" y="199" class="status" text-anchor="middle">failed</text>
+<text x="477" y="232" class="cardlabel" text-anchor="middle">AirLLM Qwen</text>
+<text x="477" y="260" class="small" text-anchor="middle">layout issue</text>
+<rect x="574" y="96" width="150" height="190" rx="4" fill="#ffffff" stroke="#cbd5e0"/>
+<circle cx="649" cy="150" r="28" fill="#c53030" />
+<text x="649" y="199" class="status" text-anchor="middle">failed</text>
+<text x="649" y="232" class="cardlabel" text-anchor="middle">AirLLM Phi</text>
+<text x="649" y="260" class="small" text-anchor="middle">unsupported phi3</text>
+<rect x="746" y="96" width="150" height="190" rx="4" fill="#ffffff" stroke="#cbd5e0"/>
+<circle cx="821" cy="150" r="28" fill="#2f855a" />
+<text x="821" y="199" class="status" text-anchor="middle">success</text>
+<text x="821" y="232" class="cardlabel" text-anchor="middle">Ollama Q4</text>
+<text x="821" y="260" class="small" text-anchor="middle">32 output tokens</text>
+</svg>
