@@ -35,7 +35,7 @@
 - [x] Create backend compatibility note.
 - [ ] Estimate memory requirements.
 - [x] Justify why the model stresses the local machine.
-- [ ] Verify installed backend availability without downloading model weights.
+- [x] Verify installed backend availability without downloading model weights.
 - [ ] Finalize backend-specific model IDs.
 - [ ] Record selected model in config and README.
 

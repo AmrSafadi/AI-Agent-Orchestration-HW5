@@ -1,0 +1,86 @@
+{
+  "collected_at_utc": "2026-06-19T07:36:01.820844+00:00",
+  "platform": {
+    "system": "Windows",
+    "release": "11",
+    "machine": "AMD64"
+  },
+  "python": {
+    "version": "3.12.13 (main, May 10 2026, 19:35:37) [MSC v.1944 64 bit (AMD64)]",
+    "executable": "C:\\Users\\amrsa\\OneDrive\\Desktop\\OrchAI\\AI-Agent-Orchestration-HW5\\.venv\\Scripts\\python.exe",
+    "implementation": "CPython"
+  },
+  "commands": {
+    "ollama": {
+      "available": false,
+      "executable": null,
+      "version_command": [
+        "ollama",
+        "--version"
+      ],
+      "returncode": null,
+      "stdout": null,
+      "stderr": null
+    },
+    "llama_cpp_cli": {
+      "available": false,
+      "executable": null,
+      "version_command": [
+        "llama-cli",
+        "--version"
+      ],
+      "returncode": null,
+      "stdout": null,
+      "stderr": null
+    },
+    "llama_cpp_server": {
+      "available": false,
+      "executable": null,
+      "version_command": [
+        "llama-server",
+        "--version"
+      ],
+      "returncode": null,
+      "stdout": null,
+      "stderr": null
+    },
+    "nvidia_smi": {
+      "available": false,
+      "executable": null,
+      "version_command": [
+        "nvidia-smi",
+        "--query-gpu=name",
+        "--format=csv,noheader"
+      ],
+      "returncode": null,
+      "stdout": null,
+      "stderr": null
+    }
+  },
+  "python_imports": {
+    "torch": {
+      "available": false,
+      "origin": null,
+      "version": null,
+      "error": null
+    },
+    "transformers": {
+      "available": false,
+      "origin": null,
+      "version": null,
+      "error": null
+    },
+    "airllm": {
+      "available": false,
+      "origin": null,
+      "version": null,
+      "error": null
+    },
+    "psutil": {
+      "available": false,
+      "origin": null,
+      "version": null,
+      "error": null
+    }
+  }
+}
