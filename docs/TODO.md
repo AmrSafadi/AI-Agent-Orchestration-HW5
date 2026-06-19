@@ -78,7 +78,8 @@
 
 ## Phase 7: Analysis and Figures
 
-- [ ] Implement result loading and summary table generation.
+- [x] Implement result loading and summary table generation.
+- [x] Add result summary table from existing JSON files.
 - [ ] Generate latency comparison figure.
 - [ ] Generate throughput comparison figure.
 - [ ] Generate memory comparison figure.
@@ -99,14 +100,15 @@
 
 - [ ] Write hardware documentation section.
 - [ ] Write model choice justification.
-- [ ] Write baseline analysis.
-- [ ] Write AirLLM and quantization analysis.
+- [x] Write baseline analysis.
+- [x] Write AirLLM and quantization analysis.
 - [ ] Explain Prefill versus Decode in relation to measurements.
 - [ ] Explain compute-bound versus memory-bound behavior.
 - [ ] Explain AirLLM, virtual memory, paging, and mmap.
 - [ ] Add economic conclusion.
 - [ ] Add limitations and recommended usage scenarios.
-- [ ] Embed tables, figures, and screenshots in `README.md`.
+- [x] Embed result summary table in `README.md`.
+- [ ] Embed figures and screenshots in `README.md`.
 
 ## Phase 10: Verification
 

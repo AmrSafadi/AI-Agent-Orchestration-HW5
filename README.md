@@ -33,13 +33,15 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |   |-- PLAN.md
 |   |-- PRD.md
 |   |-- PRD_benchmarking.md
+|   |-- RESULT_SUMMARY.md
 |   `-- TODO.md
 |-- experiments/
 |   |-- collect_hardware.py
 |   |-- check_backends.py
 |   |-- run_airllm.py
 |   |-- run_baseline.py
-|   `-- run_ollama.py
+|   |-- run_ollama.py
+|   `-- summarize_results.py
 |-- figures/
 |-- materials/
 |-- results/
@@ -165,13 +167,62 @@ Key result: 32 output tokens, 10.6684 tokens/second, 3.4027 seconds total
 runtime, and 2410.01 MB peak RAM across the Ollama runtime processes. The
 details are documented in `docs/GGUF_RESULTS.md`.
 
-## Planned Report Sections
+## Result Summary
+
+The cross-run summary table is generated from the saved JSON files only:
+
+```powershell
+uv run python experiments/summarize_results.py
+```
+
+| Run | Backend | Model | Quantization | Status | Runtime (s) | Tokens/s | Peak RAM (MB) | Evidence |
+| --- | --- | --- | --- | --- | ---: | ---: | ---: | --- |
+| Tiny Transformers smoke test | transformers | `sshleifer/tiny-gpt2` | n/a | success | 2.8321 | 112.6696 | 322.13 | Completed 8 output tokens |
+| Direct Qwen Transformers | transformers | `Qwen/Qwen2.5-3B-Instruct` | n/a | timeout | 900 | n/a | n/a | Timed out after 900 seconds |
+| AirLLM Qwen | airllm | `Qwen/Qwen2.5-3B-Instruct` | n/a | failed | n/a | n/a | n/a | `IndexError: list index out of range` |
+| AirLLM Phi-3 backup | airllm | `microsoft/Phi-3-mini-4k-instruct` | n/a | failed | n/a | n/a | n/a | BetterTransformer does not support `phi3` |
+| Ollama GGUF Q4 | ollama | `hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` | Q4_K_M | success | 3.4027 | 10.6684 | 2410.01 | Completed 32 output tokens |
+
+The same table and interpretation are kept in `docs/RESULT_SUMMARY.md`.
+
+## Analysis
+
+The experiment separates pipeline validation from local deployment feasibility.
+The tiny GPT-2 run completed quickly and confirms that the benchmark harness,
+timing fields, memory sampling, and JSON output are working. It should not be
+used as evidence that the target workload is easy, because it is far smaller
+than the selected assignment model.
+
+The direct Transformers Qwen 3B baseline is the important negative baseline. It
+timed out after 900 seconds on this Windows 11 laptop with an Intel i7-10510U,
+15.8 GB RAM, and integrated Intel UHD graphics. That result shows that a
+straight BF16 Hugging Face path is not a practical local inference mode here,
+even though the model has only 3B parameters.
+
+The AirLLM attempts are also useful evidence. Qwen 3B first exposed a
+Windows/Hugging Face cache symlink privilege issue; after switching to a
+project-local cache and disabling symlink use, AirLLM progressed through partial
+sharding but failed with a model-layout `IndexError`. The Phi-3 backup model
+then reached a different limitation: BetterTransformer does not support model
+type `phi3` in this stack. These failures support the deployment conclusion that
+local LLM success depends on the exact combination of model architecture, file
+format, backend implementation, dependency version, operating-system behavior,
+and memory strategy.
+
+The successful Ollama GGUF Q4 run is the strongest result. It used the same
+fixed prompt and 32-token generation target, completed in 3.4027 seconds, and
+produced 10.6684 output tokens per second with about 2.4 GB peak RAM. On this
+hardware, quantization and a runtime designed for GGUF had a larger practical
+impact than attempting direct full-precision Transformers execution or the
+tested AirLLM model combinations.
+
+## Remaining Report Work
 
 - Hardware specification.
 - Model selection and justification.
-- Direct baseline run.
-- AirLLM and quantization run.
-- Performance comparison.
+- Direct baseline analysis.
+- AirLLM and quantization analysis.
+- Performance comparison from `docs/RESULT_SUMMARY.md`.
 - Economic comparison: on-prem versus API.
 - Lecture concept analysis: Prefill, Decode, VRAM, paging, and memory-bound behavior.
 - Original extension and conclusions.
