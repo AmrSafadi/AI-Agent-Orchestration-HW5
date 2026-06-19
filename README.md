@@ -38,11 +38,16 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |-- experiments/
 |   |-- collect_hardware.py
 |   |-- check_backends.py
+|   |-- make_figures.py
 |   |-- run_airllm.py
 |   |-- run_baseline.py
 |   |-- run_ollama.py
 |   `-- summarize_results.py
 |-- figures/
+|   |-- decode_latency_comparison.svg
+|   |-- memory_comparison.svg
+|   |-- run_status_summary.svg
+|   `-- throughput_comparison.svg
 |-- materials/
 |-- results/
 |-- src/
@@ -56,7 +61,7 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |           |-- baseline.py
 |           `-- ollama.py
 |-- pyproject.toml
-`-- README.md
+`-- uv.lock
 ```
 
 ## Setup

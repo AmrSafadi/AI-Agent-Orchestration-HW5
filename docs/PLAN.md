@@ -2,229 +2,191 @@
 
 ## Architecture Summary
 
-The project will be organized as a reproducible benchmark workflow. Scripts will collect hardware details, run controlled inference experiments, save raw measurements, and generate figures for the final README report.
+This repository is organized as a reproducible local LLM benchmark workflow.
+The current experiment has moved past model execution and into report assembly:
+hardware, baseline, AirLLM attempts, GGUF quantization, result tables, and Phase
+7 figures are already captured. The next planned checkpoint is the economic
+analysis required by the assignment.
 
-The planned flow is:
+## Current Workflow
 
 1. Inspect local hardware and storage.
-2. Choose a model that stresses the machine.
-3. Run a direct baseline attempt.
-4. Run AirLLM with quantization options.
-5. Save raw benchmark data.
-6. Generate comparison tables and figures.
-7. Write the final README report and economic analysis.
+2. Choose a model that is large enough to stress the laptop.
+3. Run a direct Transformers baseline.
+4. Run AirLLM with the same prompt/settings and preserve failure evidence.
+5. Run a quantized GGUF comparison through Ollama.
+6. Save raw benchmark data as JSON.
+7. Generate comparison tables and figures from saved results.
+8. Add on-prem versus API economics and a break-even figure.
+9. Finish the README as the main submission report.
 
-## Proposed Repository Structure
+## Repository Structure
 
 ```text
 .
-├── README.md
-├── docs/
-│   ├── PRD.md
-│   ├── PLAN.md
-│   ├── TODO.md
-│   └── PRD_benchmarking.md
-├── src/
-│   └── airllm_benchmark/
-│       ├── __init__.py
-│       ├── config.py
-│       ├── hardware.py
-│       ├── metrics.py
-│       ├── economics.py
-│       └── runners/
-│           ├── baseline.py
-│           └── airllm_runner.py
-├── experiments/
-│   ├── collect_hardware.py
-│   ├── run_baseline.py
-│   ├── run_airllm.py
-│   └── make_figures.py
-├── config/
-│   └── experiment.example.json
-├── results/
-├── figures/
-├── materials/
-├── pyproject.toml
-└── .gitignore
+|-- README.md
+|-- config/
+|   `-- experiment.example.json
+|-- docs/
+|   |-- AIRLLM_PLAN.md
+|   |-- AIRLLM_RESULTS.md
+|   |-- BASELINE_RESULTS.md
+|   |-- BACKEND_COMPATIBILITY.md
+|   |-- GGUF_RESULTS.md
+|   |-- GGUF_QUANTIZATION_PLAN.md
+|   |-- MEMORY_ESTIMATES.md
+|   |-- MODEL_SELECTION.md
+|   |-- PLAN.md
+|   |-- PRD.md
+|   |-- PRD_benchmarking.md
+|   |-- RESULT_SUMMARY.md
+|   `-- TODO.md
+|-- experiments/
+|   |-- check_backends.py
+|   |-- collect_hardware.py
+|   |-- make_figures.py
+|   |-- run_airllm.py
+|   |-- run_baseline.py
+|   |-- run_ollama.py
+|   `-- summarize_results.py
+|-- figures/
+|   |-- decode_latency_comparison.svg
+|   |-- memory_comparison.svg
+|   |-- run_status_summary.svg
+|   `-- throughput_comparison.svg
+|-- materials/
+|-- results/
+|-- src/
+|   `-- airllm_benchmark/
+|       |-- __init__.py
+|       |-- backends.py
+|       |-- config.py
+|       |-- hardware.py
+|       |-- metrics.py
+|       `-- runners/
+|           |-- __init__.py
+|           |-- airllm.py
+|           |-- baseline.py
+|           `-- ollama.py
+|-- pyproject.toml
+`-- uv.lock
 ```
-
-This structure may be adjusted after implementation begins, but the repository should remain easy to navigate.
 
 ## Main Components
 
 ### Hardware Collection
 
-Collects and records:
+`experiments/collect_hardware.py` records CPU, core count, RAM, GPU, reported
+VRAM, storage, operating system, and Python version to `results/hardware.json`.
 
-- CPU model and core count.
-- Total RAM.
-- GPU model and VRAM when available.
-- Storage type or available disk information.
-- Operating system and Python version.
+### Backend Check
 
-Output target: `results/hardware.json`.
+`experiments/check_backends.py` records which local inference dependencies and
+backend tools are available. The output is saved in `results/backend_check.json`.
 
 ### Baseline Runner
 
-Attempts direct local inference using the selected model. The exact backend will be chosen after hardware inspection, likely Hugging Face Transformers or Ollama.
-
-Responsibilities:
-
-- Load or invoke the selected model.
-- Run a fixed prompt with fixed generation settings.
-- Record success, failure, error messages, runtime, token counts, and memory usage.
-- Capture enough evidence to explain the bottleneck.
+`experiments/run_baseline.py` supports the tiny Transformers smoke test and the
+main Qwen 3B Transformers baseline. It records success, failure, timeout,
+runtime, token counts where available, memory where measurable, output samples,
+and errors in the shared benchmark JSON schema.
 
 ### AirLLM Runner
 
-Runs the same prompt and generation settings through AirLLM.
+`experiments/run_airllm.py` runs the same fixed prompt/settings through AirLLM.
+The current evidence includes a Qwen 3B model-layout failure and a Phi-3 backup
+failure caused by BetterTransformer support limits. These are valid deployment
+compatibility findings for the final report.
 
-Responsibilities:
+### GGUF/Ollama Runner
 
-- Configure AirLLM cache and layer shard paths.
-- Run one or more quantization settings where supported.
-- Record latency, throughput, token counts, memory usage, and output sample.
-- Preserve errors or warnings for the final analysis.
+`experiments/run_ollama.py` benchmarks the quantized
+`hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` model through local Ollama. This is
+the successful local inference result.
 
-### Metrics Module
+### Analysis Scripts
 
-Defines consistent metrics across all runs:
+`experiments/summarize_results.py` prints the Markdown result summary table from
+existing JSON files. `experiments/make_figures.py` generates the Phase 7 SVG
+figures from those same saved result files without rerunning any models.
 
-- `ttft_seconds`
-- `tpot_seconds`
-- `tokens_per_second`
-- `input_tokens`
-- `output_tokens`
-- `peak_ram_mb`
-- `peak_vram_mb`
-- `total_runtime_seconds`
-- `status`
-- `notes`
+## Result Files
 
-### Economics Module
-
-Computes local/on-prem and API costs.
-
-Inputs:
-
-- Hardware purchase cost estimate.
-- Hardware lifetime in months.
-- Electricity price.
-- Power draw estimate.
-- Monthly request or token volume.
-- API input and output token pricing.
-- Optional prompt caching discount assumptions.
-
-Outputs:
-
-- Cost per request.
-- Monthly local cost.
-- Monthly API cost.
-- Break-even request or token volume.
-- Data table for a cost curve.
-
-## Experiment Design
-
-### Controlled Prompt
-
-Use one or more fixed prompts that are long enough to exercise both Prefill and Decode but short enough to keep local runs practical.
-
-Initial prompt category:
-
-- Technical explanation or summarization task.
-
-Generation settings should include:
-
-- Fixed maximum output tokens.
-- Fixed temperature.
-- Fixed model identifier.
-- Fixed quantization setting per run.
-
-### Baseline Conditions
-
-At minimum:
-
-- Direct model load or Ollama execution.
-- Same prompt and output length target as AirLLM.
-- Document whether the run completes, fails, or becomes unusably slow.
-
-### AirLLM Conditions
-
-At minimum:
-
-- AirLLM run with the same model family when feasible.
-- Quantization setting documented.
-
-Preferred if time and hardware allow:
-
-- Compare at least two quantization levels such as FP16/Q8/Q4, or the nearest supported equivalents.
-
-### Original Extension
-
-Candidate extension:
-
-- Add a break-even sensitivity analysis showing how API prompt caching changes the on-prem break-even point.
-
-Alternative extensions:
-
-- Compare two model sizes.
-- Add a memory timeline plot.
-- Add a qualitative output degradation table across quantization levels.
-
-## Data Outputs
-
-Raw data should be stored as JSON or CSV in `results/`.
-
-Recommended files:
+Current raw outputs include:
 
 - `results/hardware.json`
-- `results/baseline_results.json`
-- `results/airllm_results.json`
-- `results/economics.csv`
-- `results/summary.csv`
+- `results/backend_check.json`
+- `results/baseline_tiny_gpt2.json`
+- `results/baseline_qwen_qwen2_5_3b_instruct.json`
+- `results/airllm_install_check.json`
+- `results/airllm_qwen_qwen2_5_3b_instruct.json`
+- `results/airllm_phi3_mini_instruct.json`
+- `results/gguf_qwen2_5_3b_instruct_q4_k_m.json`
 
-Figures should be stored in `figures/`.
+Temporary smoke-test files use the `.tmp` extension and are ignored by Git.
 
-Recommended figures:
+## Figure Files
 
-- `figures/performance_comparison.png`
-- `figures/memory_comparison.png`
-- `figures/cost_break_even.png`
-- `figures/ttft_tpot_comparison.png`
+Current Phase 7 figures:
 
-## README Report Outline
+- `figures/run_status_summary.svg`
+- `figures/throughput_comparison.svg`
+- `figures/decode_latency_comparison.svg`
+- `figures/memory_comparison.svg`
 
-The final README should include:
+The next figure should be the Phase 8 cost break-even figure.
 
-- Project overview.
+## Remaining Plan
+
+### Phase 8: Economic Analysis
+
+Add reproducible on-prem versus API cost calculations:
+
+- Hardware cost and lifetime assumptions.
+- Electricity price and estimated power draw.
+- API input/output token pricing with date.
+- Local cost per request/token-volume estimate.
+- API cost for the same workload.
+- Break-even table and figure.
+- Optional prompt/context caching sensitivity.
+
+### Phase 9: Final README Report
+
+Promote the existing supporting docs into a complete README report:
+
 - Hardware specification.
 - Model selection justification.
-- Experiment setup and reproduction commands.
-- Baseline results.
-- AirLLM and quantization results.
-- Performance comparison tables and graphs.
-- Economic analysis and break-even point.
-- Lecture concept analysis.
-- Original extension.
-- Limitations and conclusions.
+- Experiment methodology.
+- Baseline, AirLLM, and GGUF result interpretation.
+- Lecture concept analysis: Prefill, Decode, compute-bound, memory-bound, VRAM,
+  virtual memory, paging, `mmap`, and quantization.
+- Economic conclusion.
+- Limitations and recommendation.
+
+### Phase 10: Verification
+
+Before submission:
+
+- Re-run non-expensive reproduction commands.
+- Confirm figures can be regenerated.
+- Check for secrets/tokens.
+- Verify required deliverables are present.
+- Record missing optional tooling explicitly if tests/linting are unavailable.
 
 ## Risks and Mitigations
 
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
-| Model download is too large | Blocks experiments | Start with hardware/disk inspection and choose a feasible model |
-| AirLLM dependency incompatibility | Blocks AirLLM run | Pin Python/dependency versions and document fallback evidence |
-| Baseline freezes or swaps heavily | Slows work | Use small token limits and timeouts |
-| GPU unavailable | Limits comparison | Emphasize CPU/RAM/AirLLM paging analysis |
-| Metrics differ across backends | Reduces comparability | Use shared prompt, token limits, and normalized result schema |
-| API prices change | Affects economics | Record pricing date and assumptions in README |
+| API prices change | Economics can become stale | Record pricing date and assumptions |
+| TTFT is unavailable for Ollama result | Metric table has a null field | Explain that the run used non-streaming API output |
+| AirLLM did not complete generation | Fewer comparable performance metrics | Treat failures as backend compatibility evidence |
+| Direct Transformers timed out | No full baseline token metrics | Use timeout as valid negative baseline evidence |
+| README becomes too scattered | Submission clarity suffers | Consolidate final conclusions in README, keep docs as appendices |
 
 ## Quality Plan
 
-- Keep source files small and focused.
-- Use `uv` for environment and dependency management where possible.
-- Avoid committing secrets.
-- Store generated raw data separately from code.
-- Prefer reproducible scripts over manual notebook-only analysis.
-- Add focused tests for cost calculations and metric utilities if implementation includes non-trivial logic.
-
+- Keep future changes scoped to the active phase.
+- Prefer generated tables/figures from saved JSON over manual numbers.
+- Avoid rerunning expensive model downloads unless explicitly needed.
+- Do not commit model caches, shards, tokens, or temporary smoke files.
+- Use `uv` for reproducible commands.

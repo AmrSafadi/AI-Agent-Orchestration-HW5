@@ -98,6 +98,7 @@
 
 ## Phase 9: Final Report
 
+- [x] Refresh `docs/PLAN.md` to match the current repository.
 - [ ] Write hardware documentation section.
 - [ ] Write model choice justification.
 - [x] Write baseline analysis.
