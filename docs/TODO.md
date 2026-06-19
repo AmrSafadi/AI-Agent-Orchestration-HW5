@@ -68,13 +68,13 @@
 - [x] Create GGUF quantization plan.
 - [x] Select recommended quantized model candidate.
 - [x] Select preferred GGUF backend path.
-- [ ] Install approved GGUF backend.
-- [ ] Verify GGUF backend availability.
-- [ ] Download approved quantized GGUF model.
-- [ ] Implement GGUF/Ollama benchmark runner or wrapper.
-- [ ] Run the same prompt and generation settings.
-- [ ] Save raw quantized GGUF result.
-- [ ] Compare GGUF result against baseline and AirLLM attempts.
+- [x] Install approved GGUF backend.
+- [x] Verify GGUF backend availability.
+- [x] Download approved quantized GGUF model.
+- [x] Implement GGUF/Ollama benchmark runner or wrapper.
+- [x] Run the same prompt and generation settings.
+- [x] Save raw quantized GGUF result.
+- [x] Compare GGUF result against baseline and AirLLM attempts.
 
 ## Phase 7: Analysis and Figures
 

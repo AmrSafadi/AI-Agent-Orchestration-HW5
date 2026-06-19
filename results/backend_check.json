@@ -1,5 +1,5 @@
 {
-  "collected_at_utc": "2026-06-19T07:48:16.633788+00:00",
+  "collected_at_utc": "2026-06-19T21:56:32.599609+00:00",
   "platform": {
     "system": "Windows",
     "release": "11",
@@ -12,14 +12,14 @@
   },
   "commands": {
     "ollama": {
-      "available": false,
-      "executable": null,
+      "available": true,
+      "executable": "C:\\Users\\amrsa\\AppData\\Local\\Programs\\Ollama\\ollama.exe",
       "version_command": [
-        "ollama",
+        "C:\\Users\\amrsa\\AppData\\Local\\Programs\\Ollama\\ollama.exe",
         "--version"
       ],
-      "returncode": null,
-      "stdout": null,
+      "returncode": 0,
+      "stdout": "ollama version is 0.30.8",
       "stderr": null
     },
     "llama_cpp_cli": {
@@ -67,12 +67,12 @@
     "transformers": {
       "available": true,
       "origin": "C:\\Users\\amrsa\\OneDrive\\Desktop\\OrchAI\\AI-Agent-Orchestration-HW5\\.venv\\Lib\\site-packages\\transformers\\__init__.py",
-      "version": "5.12.1",
+      "version": "4.48.3",
       "error": null
     },
     "airllm": {
-      "available": false,
-      "origin": null,
+      "available": true,
+      "origin": "C:\\Users\\amrsa\\OneDrive\\Desktop\\OrchAI\\AI-Agent-Orchestration-HW5\\.venv\\Lib\\site-packages\\airllm\\__init__.py",
       "version": null,
       "error": null
     },

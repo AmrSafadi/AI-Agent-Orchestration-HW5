@@ -37,6 +37,20 @@ class AirLLMRunConfig:
     timeout_seconds: int | None = None
 
 
+@dataclass(frozen=True)
+class GGUFRunConfig:
+    """Configuration needed for an Ollama/GGUF run."""
+
+    backend: str
+    model_id: str
+    quantization: str
+    prompt: str
+    max_new_tokens: int
+    temperature: float
+    output_path: Path
+    timeout_seconds: int | None = None
+
+
 def load_baseline_config(config_path: Path, project_root: Path) -> BaselineRunConfig:
     """Load the baseline subset of the experiment JSON config."""
 
@@ -93,6 +107,32 @@ def load_airllm_config(config_path: Path, project_root: Path) -> AirLLMRunConfig
     )
 
 
+def load_gguf_config(config_path: Path, project_root: Path) -> GGUFRunConfig:
+    """Load the GGUF/Ollama subset of the experiment JSON config."""
+
+    raw = json.loads(config_path.read_text(encoding="utf-8"))
+    generation = _required_dict(raw, "generation")
+    paths = _required_dict(raw, "paths")
+    gguf = _required_dict(raw, "gguf")
+
+    backend = str(gguf.get("backend", "ollama"))
+    model_id = _required_str(gguf, "model_id")
+    quantization = _required_str(gguf, "quantization")
+    results_dir = project_root / str(paths.get("results_dir", "results"))
+    result_file = str(gguf.get("result_file") or _gguf_output_name(model_id, quantization))
+
+    return GGUFRunConfig(
+        backend=backend,
+        model_id=model_id,
+        quantization=quantization,
+        prompt=_required_str(generation, "prompt"),
+        max_new_tokens=int(generation.get("max_new_tokens", 64)),
+        temperature=float(generation.get("temperature", 0.0)),
+        output_path=results_dir / result_file,
+        timeout_seconds=int(gguf["timeout_seconds"]) if gguf.get("timeout_seconds") else None,
+    )
+
+
 def _baseline_output_name(model_id: str) -> str:
     slug = (
         model_id.lower()
@@ -113,6 +153,18 @@ def _airllm_output_name(model_id: str) -> str:
         .replace(":", "_")
     )
     return f"airllm_{slug}.json"
+
+
+def _gguf_output_name(model_id: str, quantization: str) -> str:
+    slug = (
+        model_id.lower()
+        .replace("/", "_")
+        .replace("-", "_")
+        .replace(".", "_")
+        .replace(":", "_")
+    )
+    quant_slug = quantization.lower().replace("-", "_")
+    return f"gguf_{slug}_{quant_slug}.json"
 
 
 def _required_dict(raw: dict[str, Any], key: str) -> dict[str, Any]:

@@ -13,8 +13,7 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 - Direct Transformers baseline timed out after 900 seconds.
 - AirLLM is installed and has been tested against the selected model and backup
   model.
-- The next planned path is a quantized GGUF comparison, pending explicit backend
-  install and model-download approval.
+- Quantized GGUF inference through Ollama succeeded with Qwen 2.5 3B Q4_K_M.
 
 ## Repository Structure
 
@@ -27,6 +26,7 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |   |-- AIRLLM_RESULTS.md
 |   |-- BASELINE_RESULTS.md
 |   |-- BACKEND_COMPATIBILITY.md
+|   |-- GGUF_RESULTS.md
 |   |-- GGUF_QUANTIZATION_PLAN.md
 |   |-- MEMORY_ESTIMATES.md
 |   |-- MODEL_SELECTION.md
@@ -38,7 +38,8 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |   |-- collect_hardware.py
 |   |-- check_backends.py
 |   |-- run_airllm.py
-|   `-- run_baseline.py
+|   |-- run_baseline.py
+|   `-- run_ollama.py
 |-- figures/
 |-- materials/
 |-- results/
@@ -50,7 +51,8 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |       `-- runners/
 |           |-- __init__.py
 |           |-- airllm.py
-|           `-- baseline.py
+|           |-- baseline.py
+|           `-- ollama.py
 |-- pyproject.toml
 `-- README.md
 ```
@@ -143,18 +145,25 @@ with AirLLM. Sharding completed, but generation failed because Optimum
 BetterTransformer does not support model type `phi3`. The raw result is stored
 in `results/airllm_phi3_mini_instruct.json`.
 
-## Planned GGUF Quantization Experiment
+## GGUF Quantization Result
 
-The next planned experiment is a quantized GGUF comparison using:
+The quantized GGUF comparison uses:
 
 ```text
 hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M
 ```
 
-The preferred first backend is Ollama, because it provides the simplest local
-GGUF path on Windows. No GGUF backend has been installed and no quantized model
-has been downloaded yet. The plan and stop/go criteria are documented in
-`docs/GGUF_QUANTIZATION_PLAN.md`.
+Ollama `0.30.8` was installed, the 2.1 GB Q4_K_M model was downloaded, and the
+same fixed prompt completed successfully through the local Ollama API. The raw
+result is stored in:
+
+```text
+results/gguf_qwen2_5_3b_instruct_q4_k_m.json
+```
+
+Key result: 32 output tokens, 10.6684 tokens/second, 3.4027 seconds total
+runtime, and 2410.01 MB peak RAM across the Ollama runtime processes. The
+details are documented in `docs/GGUF_RESULTS.md`.
 
 ## Planned Report Sections
 
