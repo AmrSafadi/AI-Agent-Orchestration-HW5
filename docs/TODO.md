@@ -34,7 +34,7 @@
 - [x] Check preliminary license and format.
 - [x] Create model selection note.
 - [x] Create backend compatibility note.
-- [ ] Estimate memory requirements.
+- [x] Estimate memory requirements.
 - [x] Justify why the model stresses the local machine.
 - [x] Verify installed backend availability without downloading model weights.
 - [ ] Finalize backend-specific model IDs.
