@@ -14,7 +14,7 @@
   },
   "generation": {
     "prompt": "Explain the difference between prefill and decode in local LLM inference.",
-    "max_new_tokens": 64,
+    "max_new_tokens": 32,
     "temperature": 0.2
   },
   "paths": {
