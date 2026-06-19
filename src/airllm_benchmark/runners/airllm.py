@@ -9,6 +9,7 @@ from queue import Empty
 
 from airllm_benchmark.metrics import (
     BenchmarkResult,
+    ChildProcessMemorySampler,
     ProcessMemorySampler,
     compact_notes,
     error_text,
@@ -91,11 +92,14 @@ def _run_airllm_with_timeout(
         },
     )
     process.start()
-    process.join(timeout_seconds)
+    with ChildProcessMemorySampler(process.pid) as memory:
+        process.join(timeout_seconds)
+        peak_ram_mb = memory.peak_ram_mb
 
     if process.is_alive():
         process.terminate()
         process.join(timeout=5)
+        peak_ram_mb = memory.peak_ram_mb or peak_ram_mb
         return BenchmarkResult(
             run_id=run_id,
             backend="airllm",
@@ -109,7 +113,7 @@ def _run_airllm_with_timeout(
             tpot_seconds=None,
             tokens_per_second=None,
             total_runtime_seconds=float(timeout_seconds),
-            peak_ram_mb=None,
+            peak_ram_mb=peak_ram_mb,
             peak_vram_mb=None,
             output_sample=None,
             error=f"Timed out after {timeout_seconds} seconds.",
@@ -137,7 +141,7 @@ def _run_airllm_with_timeout(
             tpot_seconds=None,
             tokens_per_second=None,
             total_runtime_seconds=None,
-            peak_ram_mb=None,
+            peak_ram_mb=peak_ram_mb,
             peak_vram_mb=None,
             output_sample=None,
             error=f"Worker exited with code {process.exitcode} before returning a result.",
@@ -296,4 +300,3 @@ def _run_airllm_success_path(
             ]
         ),
     )
-
