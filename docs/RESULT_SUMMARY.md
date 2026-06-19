@@ -43,3 +43,26 @@ completed in 3.4027 seconds with 10.6684 output tokens per second and about
 2.4 GB peak RAM across the local Ollama runtime processes. For this machine,
 quantized GGUF format was the practical path where direct Transformers and the
 tested AirLLM combinations were not.
+
+## Qualitative Comparison
+
+| Run | Output quality / behavior | Report use |
+| --- | --- | --- |
+| Tiny Transformers smoke test | Completed quickly, but repeated the word `stairs`; useful only as a plumbing check. | Validates benchmark code, not model capability. |
+| Direct Qwen Transformers | Produced no completed output because the worker timed out after 900 seconds. | Negative full-precision baseline. |
+| AirLLM Qwen | Produced no generation; failed after partial sharding with `IndexError`. | AirLLM/model-layout compatibility evidence. |
+| AirLLM Phi-3 backup | Produced no generation; failed because BetterTransformer does not support `phi3`. | Backup-model dependency compatibility evidence. |
+| Ollama GGUF Q4 | Produced a relevant explanation beginning with the requested prefill/decode topic. | Best successful local inference result. |
+
+## Figures
+
+The Phase 7 figures are generated from the same saved JSON files:
+
+```powershell
+uv run python experiments/make_figures.py
+```
+
+- `figures/run_status_summary.svg`
+- `figures/throughput_comparison.svg`
+- `figures/decode_latency_comparison.svg`
+- `figures/memory_comparison.svg`

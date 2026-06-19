@@ -185,6 +185,32 @@ uv run python experiments/summarize_results.py
 
 The same table and interpretation are kept in `docs/RESULT_SUMMARY.md`.
 
+## Figures
+
+The comparison figures are generated from saved result JSON files only:
+
+```powershell
+uv run python experiments/make_figures.py
+```
+
+![Run status summary](figures/run_status_summary.svg)
+
+![Throughput comparison](figures/throughput_comparison.svg)
+
+![Decode latency comparison](figures/decode_latency_comparison.svg)
+
+![Peak RAM comparison](figures/memory_comparison.svg)
+
+## Qualitative Comparison
+
+| Run | Output quality / behavior | Report use |
+| --- | --- | --- |
+| Tiny Transformers smoke test | Completed quickly, but repeated `stairs`; useful only as a plumbing check. | Validates benchmark code, not model capability. |
+| Direct Qwen Transformers | Produced no completed output because the worker timed out after 900 seconds. | Negative full-precision baseline. |
+| AirLLM Qwen | Produced no generation; failed after partial sharding with `IndexError`. | AirLLM/model-layout compatibility evidence. |
+| AirLLM Phi-3 backup | Produced no generation; failed because BetterTransformer does not support `phi3`. | Backup-model dependency compatibility evidence. |
+| Ollama GGUF Q4 | Produced a relevant explanation beginning with the requested prefill/decode topic. | Best successful local inference result. |
+
 ## Analysis
 
 The experiment separates pipeline validation from local deployment feasibility.

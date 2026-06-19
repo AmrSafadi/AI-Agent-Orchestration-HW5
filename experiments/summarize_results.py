@@ -21,7 +21,10 @@ def main() -> None:
     """Load existing benchmark outputs and print a compact Markdown table."""
 
     rows = [_load_result(path) for path in RESULTS]
-    print("| Run | Backend | Model | Quantization | Status | Runtime (s) | Tokens/s | Peak RAM (MB) | Evidence |")
+    print(
+        "| Run | Backend | Model | Quantization | Status | Runtime (s) | "
+        "Tokens/s | Peak RAM (MB) | Evidence |"
+    )
     print("| --- | --- | --- | --- | --- | ---: | ---: | ---: | --- |")
     for path, row in zip(RESULTS, rows, strict=True):
         print(

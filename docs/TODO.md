@@ -80,11 +80,11 @@
 
 - [x] Implement result loading and summary table generation.
 - [x] Add result summary table from existing JSON files.
-- [ ] Generate latency comparison figure.
-- [ ] Generate throughput comparison figure.
-- [ ] Generate memory comparison figure.
+- [x] Generate latency comparison figure.
+- [x] Generate throughput comparison figure.
+- [x] Generate memory comparison figure.
 - [ ] Generate cost break-even figure.
-- [ ] Add qualitative output comparison table.
+- [x] Add qualitative output comparison table.
 
 ## Phase 8: Economic Analysis
 
@@ -108,7 +108,8 @@
 - [ ] Add economic conclusion.
 - [ ] Add limitations and recommended usage scenarios.
 - [x] Embed result summary table in `README.md`.
-- [ ] Embed figures and screenshots in `README.md`.
+- [x] Embed Phase 7 figures in `README.md`.
+- [ ] Embed screenshots in `README.md` if useful.
 
 ## Phase 10: Verification
 
