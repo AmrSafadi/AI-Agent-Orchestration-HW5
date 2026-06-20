@@ -13,8 +13,8 @@ It avoids rerunning large model downloads or expensive inference jobs.
 | Result table generation | `uv run python experiments/summarize_results.py` | Passed |
 | Figure regeneration | `uv run python experiments/make_figures.py` | Passed |
 | Economic artifact regeneration | `uv run python experiments/run_economics.py` | Passed |
-| Unit tests | `uv run python -m pytest` | Passed, 14 tests |
-| Coverage report | `uv run python -m pytest --cov=src --cov=experiments --cov-report=term-missing` | Passed, 25% line coverage; no fail-under gate because tests focus on deterministic helpers and avoid model execution |
+| Unit tests | `uv run python -m pytest` | Passed, 20 tests |
+| Coverage report | `uv run python -m pytest --cov=src --cov=experiments --cov-report=term-missing` | Passed, 33% line coverage; no fail-under gate because tests focus on deterministic helpers and avoid model execution |
 | Linting | `uv run ruff check experiments src tests` | Passed |
 | Secret scan | `rg -n "api[_-]?key|hf_token|huggingface.*token|OPENAI_API_KEY|ANTHROPIC|sk-|hf_[A-Za-z0-9]" .` | No committed secrets found; hits are placeholders, config field names, package names, and documentation references |
 

@@ -80,6 +80,7 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |   |-- test_economics.py
 |   |-- test_metrics.py
 |   |-- test_ollama.py
+|   |-- test_runner_results.py
 |   `-- test_summary.py
 |-- pyproject.toml
 `-- uv.lock
