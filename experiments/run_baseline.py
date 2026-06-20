@@ -25,6 +25,10 @@ def main() -> None:
 
     if args.config is None and args.model_id is None:
         output_path = PROJECT_ROOT / "results" / "baseline_tiny_gpt2.json"
+        if args.dry_run:
+            print(json.dumps(_tiny_config_as_json(output_path), indent=2))
+            print("\nDry run only; no model was loaded and no output file was written.")
+            return
         result = run_tiny_gpt2_baseline(output_path)
         print(json.dumps(asdict(result), indent=2))
         print(f"\nSaved tiny baseline result to {output_path}")
@@ -122,6 +126,18 @@ def _config_as_json(config: BaselineRunConfig) -> dict[str, object]:
         "output_path": str(config.output_path),
         "local_files_only": config.local_files_only,
         "timeout_seconds": config.timeout_seconds,
+    }
+
+
+def _tiny_config_as_json(output_path: Path) -> dict[str, object]:
+    return {
+        "model_id": "sshleifer/tiny-gpt2",
+        "prompt": "Local LLM benchmarking checks",
+        "max_new_tokens": 8,
+        "temperature": 0.0,
+        "output_path": str(output_path),
+        "local_files_only": False,
+        "timeout_seconds": None,
     }
 
 

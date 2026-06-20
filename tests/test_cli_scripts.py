@@ -61,11 +61,19 @@ def test_cli_main_dry_runs_and_tiny_branch(tmp_path, monkeypatch, capsys) -> Non
     monkeypatch.setattr(
         run_baseline,
         "_parse_args",
-        lambda: SimpleNamespace(config=None, model_id=None),
+        lambda: SimpleNamespace(config=None, model_id=None, dry_run=False),
     )
     monkeypatch.setattr(run_baseline, "run_tiny_gpt2_baseline", lambda path: result("tiny"))
     run_baseline.main()
     assert "Saved tiny baseline result" in capsys.readouterr().out
+
+    monkeypatch.setattr(
+        run_baseline,
+        "_parse_args",
+        lambda: SimpleNamespace(config=None, model_id=None, dry_run=True),
+    )
+    run_baseline.main()
+    assert "Dry run only" in capsys.readouterr().out
 
     config = BaselineRunConfig("model", "prompt", 1, 0.0, tmp_path / "out.json")
     monkeypatch.setattr(
