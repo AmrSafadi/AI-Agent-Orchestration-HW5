@@ -66,8 +66,14 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |       `-- runners/
 |           |-- __init__.py
 |           |-- airllm.py
+|           |-- airllm_runtime.py
 |           |-- baseline.py
-|           `-- ollama.py
+|           |-- baseline_results.py
+|           |-- baseline_transformers.py
+|           |-- ollama.py
+|           |-- ollama_api.py
+|           |-- ollama_memory.py
+|           `-- process.py
 |-- tests/
 |   |-- conftest.py
 |   |-- test_config.py
