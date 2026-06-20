@@ -98,13 +98,13 @@ The command writes the smoke-test benchmark result to:
 results/baseline_tiny_gpt2.json
 ```
 
-## Planned Model Strategy
+## Model Strategy
 
 | Role | Model |
 | --- | --- |
 | Completed pipeline validation | `sshleifer/tiny-gpt2` |
 | Main HF/AirLLM candidate | `Qwen/Qwen2.5-3B-Instruct` |
-| Optional quantized GGUF comparison | `Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` |
+| Quantized GGUF comparison | `Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` |
 | Backup HF candidate | `microsoft/Phi-3-mini-4k-instruct` |
 | Deferred as too large for first download | `Qwen/Qwen2.5-7B-Instruct` |
 
@@ -124,9 +124,9 @@ results/baseline_qwen_qwen2_5_3b_instruct.json
 This is a valid negative baseline outcome: direct BF16 Transformers execution is
 not comfortable on the current CPU/RAM-only laptop setup.
 
-## Planned AirLLM Experiment
+## AirLLM Experiment Results
 
-The next planned intervention is AirLLM with the same
+The AirLLM intervention used the same
 `Qwen/Qwen2.5-3B-Instruct` model, prompt, and generation settings. The planned
 layer/cache path is:
 
@@ -283,6 +283,5 @@ tested AirLLM model combinations.
 - Direct baseline analysis.
 - AirLLM and quantization analysis.
 - Performance comparison from `docs/RESULT_SUMMARY.md`.
-- Economic comparison: on-prem versus API.
 - Lecture concept analysis: Prefill, Decode, VRAM, paging, and memory-bound behavior.
 - Original extension and conclusions.

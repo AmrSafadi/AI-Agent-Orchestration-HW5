@@ -5,8 +5,8 @@
 This repository is organized as a reproducible local LLM benchmark workflow.
 The current experiment has moved past model execution and into report assembly:
 hardware, baseline, AirLLM attempts, GGUF quantization, result tables, and Phase
-7 figures are already captured. The next planned checkpoint is the economic
-analysis required by the assignment.
+7 figures, and Phase 8 economics are already captured. The next planned
+checkpoint is the final README report pass required by the assignment.
 
 ## Current Workflow
 
@@ -146,7 +146,7 @@ limitations into the README.
 
 ### Phase 8: Economic Analysis
 
-Add reproducible on-prem versus API cost calculations:
+Completed reproducible on-prem versus API cost calculations:
 
 - Hardware cost and lifetime assumptions.
 - Electricity price and estimated power draw.
