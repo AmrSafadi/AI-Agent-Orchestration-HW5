@@ -15,14 +15,14 @@
   "workload": {
     "input_tokens": 23,
     "output_tokens": 32,
-    "runtime_seconds": 3.4027
+    "runtime_seconds": 13.4804
   },
   "costs": {
-    "local_variable_usd_per_request": 8.51e-06,
+    "local_variable_usd_per_request": 3.37e-05,
     "local_fixed_usd_per_month": 19.4444,
     "api_usd_per_request": 0.00016125,
     "api_cached_usd_per_request": 0.00014883,
-    "break_even_requests_per_month": 127301,
-    "cached_break_even_requests_per_month": 138569
+    "break_even_requests_per_month": 152447,
+    "cached_break_even_requests_per_month": 168893
   }
 }

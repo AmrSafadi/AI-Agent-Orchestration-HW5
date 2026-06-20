@@ -17,7 +17,7 @@ uv run python experiments/summarize_results.py
 | Direct Qwen Transformers | transformers | Qwen/Qwen2.5-3B-Instruct | n/a | timeout | 900 | n/a | n/a | Timed out after 900 seconds. |
 | AirLLM Qwen | airllm | Qwen/Qwen2.5-3B-Instruct | n/a | failed | n/a | n/a | n/a | IndexError: list index out of range |
 | AirLLM Phi-3 backup | airllm | microsoft/Phi-3-mini-4k-instruct | n/a | failed | n/a | n/a | n/a | NotImplementedError: The model type phi3 is not yet supported to be used with BetterTransformer |
-| Ollama GGUF Q4 | ollama | hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M | Q4_K_M | success | 3.4027 | 10.6684 | 2410.01 | Completed 32 output tokens |
+| Ollama GGUF Q4 | ollama | hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M | Q4_K_M | success | 13.4804 | 4.4649 | 2347.17 | Completed 32 output tokens |
 
 ## Cross-Run Interpretation
 
@@ -39,10 +39,10 @@ download/cache problem. Phi-3 reached a different backend limitation:
 BetterTransformer does not support model type `phi3` in this stack.
 
 The Ollama GGUF Q4 run is the successful local LLM result. The same fixed prompt
-completed in 3.4027 seconds with 10.6684 output tokens per second and about
-2.4 GB peak RAM across the local Ollama runtime processes. For this machine,
-quantized GGUF format was the practical path where direct Transformers and the
-tested AirLLM combinations were not.
+completed in 13.4804 seconds with 6.3538 seconds TTFT, 4.4649 output tokens per
+second, and about 2.3 GB peak RAM across the local Ollama runtime processes. For
+this machine, quantized GGUF format was the practical path where direct
+Transformers and the tested AirLLM combinations were not.
 
 ## Qualitative Comparison
 

@@ -53,7 +53,7 @@ without heavy paging, not merely that the model-weight file is smaller than
 
 | Model | Role | Approx params / file scale | Expected weight memory | Practical RAM expectation on this machine | Risk |
 | --- | --- | --- | --- | --- | --- |
-| `sshleifer/tiny-gpt2` | Pipeline validation only | Tiny test model, far below 1B params | Negligible relative to system RAM | Already ran successfully with peak process RAM around 358 MB in `results/baseline_tiny_gpt2.json` | Low |
+| `sshleifer/tiny-gpt2` | Pipeline validation only | Tiny test model, far below 1B params | Negligible relative to system RAM | Already ran successfully with peak process RAM of 322.13 MB in `results/baseline_tiny_gpt2.json` | Low |
 | `Qwen/Qwen2.5-3B-Instruct` | Main HF/AirLLM candidate | 3.09B params | About 6.2 GB in BF16; about 12.4 GB in FP32 | Good stress fit: likely heavy under Transformers on CPU/RAM, but not as unrealistic as 7B | Medium to high |
 | `Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` | Quantized GGUF comparison candidate | 3.09B params, quantized GGUF | Model card lists Q4_K_M around 2.1 GB | Plausible local CPU quantized run if Ollama or llama.cpp is approved; still expected to be slow | Medium |
 | `microsoft/Phi-3-mini-4k-instruct` | Backup HF candidate | About 3.8B params | About 7.6 GB in FP16/BF16; about 15.2 GB in FP32 | Strong backup, but slightly larger than Qwen 3B and less clean for matching GGUF/AirLLM comparison | Medium to high |

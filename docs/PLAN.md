@@ -5,8 +5,7 @@
 This repository is organized as a reproducible local LLM benchmark workflow.
 The current experiment has moved past model execution and into report assembly:
 hardware, baseline, AirLLM attempts, GGUF quantization, result tables, and Phase
-7 figures are already captured. The next planned checkpoint is the economic
-analysis required by the assignment.
+7 figures, Phase 8 economics, and the final README report are already captured.
 
 ## Current Workflow
 
@@ -139,14 +138,11 @@ Current Phase 7 figures:
 - `figures/memory_comparison.svg`
 - `figures/cost_break_even.svg`
 
-The next report checkpoint should promote the remaining concept explanations and
-limitations into the README.
-
-## Remaining Plan
+## Completed Final Phases
 
 ### Phase 8: Economic Analysis
 
-Add reproducible on-prem versus API cost calculations:
+Completed reproducible on-prem versus API cost calculations:
 
 - Hardware cost and lifetime assumptions.
 - Electricity price and estimated power draw.
@@ -158,7 +154,7 @@ Add reproducible on-prem versus API cost calculations:
 
 ### Phase 9: Final README Report
 
-Promote the existing supporting docs into a complete README report:
+The existing supporting docs were promoted into a complete README report:
 
 - Hardware specification.
 - Model selection justification.
@@ -171,7 +167,7 @@ Promote the existing supporting docs into a complete README report:
 
 ### Phase 10: Verification
 
-Before submission:
+Final non-expensive verification includes:
 
 - Re-run non-expensive reproduction commands.
 - Confirm figures can be regenerated.
@@ -184,7 +180,7 @@ Before submission:
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
 | API prices change | Economics can become stale | Record pricing date and assumptions |
-| TTFT is unavailable for Ollama result | Metric table has a null field | Explain that the run used non-streaming API output |
+| TTFT is unavailable for failed runs | Direct Transformers and AirLLM have null fields | Explain that those paths failed before producing a normal inference trace |
 | AirLLM did not complete generation | Fewer comparable performance metrics | Treat failures as backend compatibility evidence |
 | Direct Transformers timed out | No full baseline token metrics | Use timeout as valid negative baseline evidence |
 | README becomes too scattered | Submission clarity suffers | Consolidate final conclusions in README, keep docs as appendices |

@@ -37,6 +37,7 @@ def run_ollama_gguf(
     temperature: float,
     timeout_seconds: int | None = DEFAULT_OLLAMA_TIMEOUT_SECONDS,
     api_url: str = DEFAULT_OLLAMA_URL,
+    stream: bool = False,
 ) -> BenchmarkResult:
     """Run an Ollama-hosted GGUF model with timeout and failure capture."""
 
@@ -50,6 +51,7 @@ def run_ollama_gguf(
             max_new_tokens=max_new_tokens,
             temperature=temperature,
             api_url=api_url,
+            stream=stream,
         )
     else:
         result = _run_ollama_with_timeout(
@@ -60,6 +62,7 @@ def run_ollama_gguf(
             max_new_tokens=max_new_tokens,
             temperature=temperature,
             api_url=api_url,
+            stream=stream,
             timeout_seconds=timeout_seconds,
         )
 
@@ -76,6 +79,7 @@ def _run_ollama_with_timeout(
     max_new_tokens: int,
     temperature: float,
     api_url: str,
+    stream: bool,
     timeout_seconds: int,
 ) -> BenchmarkResult:
     queue: mp.Queue[BenchmarkResult] = mp.Queue(maxsize=1)
@@ -90,6 +94,7 @@ def _run_ollama_with_timeout(
             "max_new_tokens": max_new_tokens,
             "temperature": temperature,
             "api_url": api_url,
+            "stream": stream,
         },
     )
     process.start()
@@ -152,6 +157,7 @@ def _run_ollama_worker(
     max_new_tokens: int,
     temperature: float,
     api_url: str,
+    stream: bool,
 ) -> None:
     result = _run_ollama_with_error_capture(
         run_id=run_id,
@@ -161,6 +167,7 @@ def _run_ollama_worker(
         max_new_tokens=max_new_tokens,
         temperature=temperature,
         api_url=api_url,
+        stream=stream,
     )
     queue.put(result)
 
@@ -174,6 +181,7 @@ def _run_ollama_with_error_capture(
     max_new_tokens: int,
     temperature: float,
     api_url: str,
+    stream: bool,
 ) -> BenchmarkResult:
     try:
         return _run_ollama_success_path(
@@ -184,6 +192,7 @@ def _run_ollama_with_error_capture(
             max_new_tokens=max_new_tokens,
             temperature=temperature,
             api_url=api_url,
+            stream=stream,
         )
     except Exception as exc:  # pragma: no cover - depends on local Ollama service
         return BenchmarkResult(
@@ -216,11 +225,12 @@ def _run_ollama_success_path(
     max_new_tokens: int,
     temperature: float,
     api_url: str,
+    stream: bool,
 ) -> BenchmarkResult:
     payload = {
         "model": model_id,
         "prompt": prompt,
-        "stream": False,
+        "stream": stream,
         "options": {
             "num_predict": max_new_tokens,
             "temperature": temperature,
@@ -238,13 +248,17 @@ def _run_ollama_success_path(
     with OllamaProcessMemorySampler() as memory:
         try:
             with urllib.request.urlopen(request, timeout=None) as response:
-                raw_response = response.read()
+                if stream:
+                    raw, response_text, ttft_seconds = _read_streaming_response(response, start)
+                else:
+                    raw_response = response.read()
+                    raw = json.loads(raw_response.decode("utf-8"))
+                    response_text = str(raw.get("response", "")).strip()
+                    ttft_seconds = None
         except urllib.error.URLError as exc:
             raise RuntimeError(f"Ollama API request failed: {exc}") from exc
     wall_seconds = time.perf_counter() - start
 
-    raw = json.loads(raw_response.decode("utf-8"))
-    response_text = str(raw.get("response", "")).strip()
     input_tokens = _optional_int(raw.get("prompt_eval_count"))
     output_tokens = _optional_int(raw.get("eval_count"))
     eval_duration = _duration_seconds(raw.get("eval_duration"))
@@ -264,7 +278,7 @@ def _run_ollama_success_path(
         prompt=prompt,
         input_tokens=input_tokens,
         output_tokens=output_tokens,
-        ttft_seconds=None,
+        ttft_seconds=safe_round(ttft_seconds),
         tpot_seconds=safe_round(tpot_seconds),
         tokens_per_second=safe_round(tokens_per_second),
         total_runtime_seconds=safe_round(total_duration or wall_seconds),
@@ -274,14 +288,38 @@ def _run_ollama_success_path(
         error=None,
         notes=compact_notes(
             [
-                "Ollama/GGUF was run through the local /api/generate endpoint with stream=false.",
-                "TTFT is null because the non-streaming API response does not expose first-token timing.",
+                f"Ollama/GGUF was run through the local /api/generate endpoint with stream={str(stream).lower()}.",
+                (
+                    "TTFT was measured from the first streamed response chunk."
+                    if stream
+                    else "TTFT is null because the non-streaming API response does not expose first-token timing."
+                ),
                 f"Measured wall-clock request time: {safe_round(wall_seconds)} seconds.",
                 f"Prompt eval duration: {safe_round(prompt_eval_duration)} seconds.",
                 f"Load duration: {safe_round(load_duration)} seconds.",
             ]
         ),
     )
+
+
+def _read_streaming_response(
+    response: object, start: float
+) -> tuple[dict[str, Any], str, float | None]:
+    chunks = []
+    final: dict[str, Any] | None = None
+    ttft_seconds = None
+    for line in response:
+        if not line:
+            continue
+        item = json.loads(line.decode("utf-8"))
+        text = str(item.get("response", ""))
+        if text and ttft_seconds is None:
+            ttft_seconds = time.perf_counter() - start
+        chunks.append(text)
+        final = item
+    if final is None:
+        raise RuntimeError("Ollama streaming response ended without a final JSON object.")
+    return final, "".join(chunks).strip(), ttft_seconds
 
 
 class OllamaProcessMemorySampler:

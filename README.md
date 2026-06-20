@@ -35,7 +35,8 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |   |-- PRD.md
 |   |-- PRD_benchmarking.md
 |   |-- RESULT_SUMMARY.md
-|   `-- TODO.md
+|   |-- TODO.md
+|   `-- VERIFICATION.md
 |-- experiments/
 |   |-- collect_hardware.py
 |   |-- check_backends.py
@@ -56,6 +57,8 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |-- src/
 |   `-- airllm_benchmark/
 |       |-- __init__.py
+|       |-- backends.py
+|       |-- config.py
 |       |-- hardware.py
 |       |-- metrics.py
 |       `-- runners/
@@ -63,6 +66,12 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |           |-- airllm.py
 |           |-- baseline.py
 |           `-- ollama.py
+|-- tests/
+|   |-- conftest.py
+|   |-- test_config.py
+|   |-- test_economics.py
+|   |-- test_ollama.py
+|   `-- test_summary.py
 |-- pyproject.toml
 `-- uv.lock
 ```
@@ -72,6 +81,7 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 This project uses `uv`.
 
 ```powershell
+uv sync
 uv run python experiments/collect_hardware.py
 ```
 
@@ -80,6 +90,61 @@ The command writes hardware information to:
 ```text
 results/hardware.json
 ```
+
+## Full Reproduction
+
+The saved JSON files under `results/` are the source of truth for the final
+report, so the cheapest way to reproduce the submitted tables and figures does
+not rerun model downloads or long inference jobs:
+
+```powershell
+uv sync
+uv run python -m compileall experiments src
+uv run python experiments/summarize_results.py
+uv run python experiments/make_figures.py
+uv run python experiments/run_economics.py
+```
+
+The model-running commands are more expensive and may download model weights:
+
+```powershell
+uv run python experiments/run_baseline.py
+uv run python experiments/run_baseline.py --config config/experiment.example.json --allow-download
+uv run python experiments/run_airllm.py --config config/experiment.example.json
+uv run python experiments/run_ollama.py --config config/experiment.example.json
+```
+
+The Ollama/GGUF run requires a local Ollama service and the selected GGUF model:
+
+```powershell
+ollama --version
+ollama pull hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M
+uv run python experiments/run_ollama.py --config config/experiment.example.json --stream
+```
+
+Expected outputs are written to `results/*.json`, `results/*.csv`, and
+`figures/*.svg`. The direct Qwen Transformers and AirLLM commands are expected
+to be slow or fail on the recorded laptop; those negative outcomes are part of
+the submitted evidence.
+
+## Hardware Specification
+
+The experiment was run on a Windows 11 laptop, recorded in
+`results/hardware.json`.
+
+| Component | Value |
+| --- | --- |
+| CPU | Intel(R) Core(TM) i7-10510U CPU @ 1.80GHz |
+| CPU cores | 4 physical, 8 logical |
+| RAM | 15.8 GB |
+| GPU | Intel(R) UHD Graphics |
+| Reported VRAM | 1.0 GB |
+| Disk | 471.82 GB total, 315.97 GB free at collection time |
+| Python | CPython 3.12.13 in the project `.venv` |
+
+This is a CPU/RAM-limited inference environment. The integrated Intel GPU is not
+a practical CUDA target, so the central bottleneck is system memory, memory
+bandwidth, and backend compatibility rather than GPU throughput.
 
 ## Tiny Baseline Smoke Test
 
@@ -98,18 +163,27 @@ The command writes the smoke-test benchmark result to:
 results/baseline_tiny_gpt2.json
 ```
 
-## Planned Model Strategy
+## Model Strategy
 
 | Role | Model |
 | --- | --- |
 | Completed pipeline validation | `sshleifer/tiny-gpt2` |
 | Main HF/AirLLM candidate | `Qwen/Qwen2.5-3B-Instruct` |
-| Optional quantized GGUF comparison | `Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` |
+| Quantized GGUF comparison | `Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` |
 | Backup HF candidate | `microsoft/Phi-3-mini-4k-instruct` |
 | Deferred as too large for first download | `Qwen/Qwen2.5-7B-Instruct` |
 
 The selected 3B Qwen model is intended to stress the 15.8 GB RAM laptop without
 making the first real experiment as risky as a full 7B BF16 direct load.
+
+The model choice deliberately avoids two extremes. `sshleifer/tiny-gpt2` is too
+small to prove local LLM feasibility, so it is used only to validate the
+benchmark plumbing. A 7B BF16 model is too close to the laptop's total RAM before
+runtime overhead, KV cache, tokenizer buffers, and the operating system are
+counted. Qwen 2.5 3B is the middle point: large enough to expose practical local
+deployment limits, but still plausible for an AirLLM and quantized GGUF
+experiment. The matching Q4_K_M GGUF model keeps the quantized comparison in the
+same model family.
 
 ## Current Baseline Result
 
@@ -124,9 +198,9 @@ results/baseline_qwen_qwen2_5_3b_instruct.json
 This is a valid negative baseline outcome: direct BF16 Transformers execution is
 not comfortable on the current CPU/RAM-only laptop setup.
 
-## Planned AirLLM Experiment
+## AirLLM Experiment Results
 
-The next planned intervention is AirLLM with the same
+The AirLLM intervention used the same
 `Qwen/Qwen2.5-3B-Instruct` model, prompt, and generation settings. The planned
 layer/cache path is:
 
@@ -141,9 +215,9 @@ install check is stored in `results/airllm_install_check.json`, and the detailed
 plan is documented in `docs/AIRLLM_PLAN.md`.
 
 The first AirLLM execution attempt failed before benchmarking because Hugging
-Face cache symlink creation hit Windows privilege error `WinError 1314`. The raw
-result is stored in `results/airllm_qwen_qwen2_5_3b_instruct.json` and
-documented in `docs/AIRLLM_RESULTS.md`.
+Face cache symlink creation hit Windows privilege error `WinError 1314`. That
+historical attempt is documented in `docs/AIRLLM_RESULTS.md`; it is not the
+current raw Qwen result file.
 
 A retry using a project-local Hugging Face cache bypassed the symlink failure
 and progressed through AirLLM layer sharding, but failed before generation with
@@ -154,6 +228,16 @@ The documented backup model, `microsoft/Phi-3-mini-4k-instruct`, was also tried
 with AirLLM. Sharding completed, but generation failed because Optimum
 BetterTransformer does not support model type `phi3`. The raw result is stored
 in `results/airllm_phi3_mini_instruct.json`.
+
+## Original Extension
+
+The original extension beyond the minimum baseline/AirLLM workflow is the
+quantized GGUF/Ollama comparison plus cached-input economic sensitivity. The
+GGUF Q4_K_M run uses the same Qwen model family as the Hugging Face candidate
+and demonstrates that model format, quantization, and runtime choice can matter
+more than parameter count alone on this laptop. The economics script then adds
+an 80% cached-input case to show how prompt caching changes the API break-even
+point.
 
 ## GGUF Quantization Result
 
@@ -171,9 +255,9 @@ result is stored in:
 results/gguf_qwen2_5_3b_instruct_q4_k_m.json
 ```
 
-Key result: 32 output tokens, 10.6684 tokens/second, 3.4027 seconds total
-runtime, and 2410.01 MB peak RAM across the Ollama runtime processes. The
-details are documented in `docs/GGUF_RESULTS.md`.
+Key result: 32 output tokens, 6.3538 seconds TTFT, 4.4649 tokens/second,
+13.4804 seconds total runtime, and 2347.17 MB peak RAM across the Ollama runtime
+processes. The details are documented in `docs/GGUF_RESULTS.md`.
 
 ## Result Summary
 
@@ -189,7 +273,7 @@ uv run python experiments/summarize_results.py
 | Direct Qwen Transformers | transformers | `Qwen/Qwen2.5-3B-Instruct` | n/a | timeout | 900 | n/a | n/a | Timed out after 900 seconds |
 | AirLLM Qwen | airllm | `Qwen/Qwen2.5-3B-Instruct` | n/a | failed | n/a | n/a | n/a | `IndexError: list index out of range` |
 | AirLLM Phi-3 backup | airllm | `microsoft/Phi-3-mini-4k-instruct` | n/a | failed | n/a | n/a | n/a | BetterTransformer does not support `phi3` |
-| Ollama GGUF Q4 | ollama | `hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` | Q4_K_M | success | 3.4027 | 10.6684 | 2410.01 | Completed 32 output tokens |
+| Ollama GGUF Q4 | ollama | `hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` | Q4_K_M | success | 13.4804 | 4.4649 | 2347.17 | Completed 32 output tokens |
 
 The same table and interpretation are kept in `docs/RESULT_SUMMARY.md`.
 
@@ -238,10 +322,10 @@ months, $0.20/kWh electricity, and a 45 W estimated inference power draw.
 
 For the measured GGUF workload of 23 input tokens and 32 output tokens, the API
 request cost is about $0.000161. The local variable electricity cost is about
-$0.0000085 per request, but the amortized hardware cost is about $19.44 per
-month. Under these assumptions, local inference breaks even at about 127,000
+$0.0000337 per request, but the amortized hardware cost is about $19.44 per
+month. Under these assumptions, local inference breaks even at about 152,000
 similar requests per month. With 80% cached input tokens, the API request cost
-falls slightly and break-even moves to about 139,000 requests per month.
+falls slightly and break-even moves to about 169,000 requests per month.
 
 ![Cost break-even](figures/cost_break_even.svg)
 
@@ -270,19 +354,135 @@ format, backend implementation, dependency version, operating-system behavior,
 and memory strategy.
 
 The successful Ollama GGUF Q4 run is the strongest result. It used the same
-fixed prompt and 32-token generation target, completed in 3.4027 seconds, and
-produced 10.6684 output tokens per second with about 2.4 GB peak RAM. On this
-hardware, quantization and a runtime designed for GGUF had a larger practical
-impact than attempting direct full-precision Transformers execution or the
-tested AirLLM model combinations.
+fixed prompt and 32-token generation target, completed in 13.4804 seconds,
+measured TTFT at 6.3538 seconds, and produced 4.4649 output tokens per second
+with about 2.3 GB peak RAM. On this hardware, quantization and a runtime
+designed for GGUF had a larger practical impact than attempting direct
+full-precision Transformers execution or the tested AirLLM model combinations.
 
-## Remaining Report Work
+## Lecture Concept Analysis
 
-- Hardware specification.
-- Model selection and justification.
-- Direct baseline analysis.
-- AirLLM and quantization analysis.
-- Performance comparison from `docs/RESULT_SUMMARY.md`.
-- Economic comparison: on-prem versus API.
-- Lecture concept analysis: Prefill, Decode, VRAM, paging, and memory-bound behavior.
-- Original extension and conclusions.
+### Prefill And Decode
+
+LLM inference has two major phases. In prefill, the model processes the whole
+input prompt and builds the initial KV cache. This phase can use larger matrix
+operations and is often more compute-bound on hardware that has a capable GPU.
+In decode, the model generates one token at a time. Each new token depends on
+the previous token, so this phase is more sequential and repeatedly touches
+model weights and KV cache.
+
+The successful Ollama result used streaming output from the local API, so
+`ttft_seconds` is recorded as 6.3538 seconds. The decode-related metric is
+`tpot_seconds = 0.224`, or about 4.4649 output tokens per second. The direct
+Transformers and AirLLM runs did not complete generation, so their missing
+TTFT/TPOT fields are part of the evidence: those paths failed before producing a
+normal inference trace.
+
+### Compute-Bound Versus Memory-Bound
+
+This laptop does not have a CUDA-capable GPU with enough VRAM for normal local
+LLM serving. Direct BF16 Transformers therefore runs on a CPU/RAM path, where
+large model weights, Python framework overhead, and memory movement dominate.
+The 900-second Qwen timeout shows that the direct full-precision path is not
+comfortable on this machine, even for a 3B-class model.
+
+The GGUF result points in the other direction: the Q4_K_M model is about 2.1 GB
+locally and completed with about 2.4 GB peak RAM across the Ollama runtime
+processes. This suggests the practical bottleneck was not only parameter count;
+format, quantization, and backend implementation changed whether the workload
+was feasible.
+
+### VRAM, Paging, And AirLLM
+
+VRAM matters because transformer inference is usually fastest when weights,
+activations, and KV cache fit near the GPU compute units. This machine reports
+only 1.0 GB of integrated GPU VRAM, so the experiment is effectively a CPU and
+system-RAM deployment.
+
+AirLLM is relevant because it tries to reduce peak active memory by moving
+through model layers rather than keeping the whole model resident in the same
+way as a direct load. Conceptually, this resembles virtual memory and paging:
+only the currently needed part of a larger working set is active, while other
+parts live on disk or in a cache path. The tradeoff is latency. Moving layers
+through memory and storage can make a model fit more easily, but repeated I/O
+can slow generation substantially.
+
+`mmap` is the related operating-system mechanism where a runtime maps model
+files into virtual memory and lets the OS page file regions in and out instead
+of explicitly reading the entire model into ordinary process memory at once.
+AirLLM's layer-sharding strategy is not identical to every `mmap` runtime, but
+both approaches expose the same deployment tradeoff: lower peak resident memory
+can come with more dependence on storage latency and paging behavior.
+
+In this project, AirLLM did not reach completed generation. That is still useful
+deployment evidence. The Qwen run first exposed a Windows/Hugging Face symlink
+permission problem, then failed with a Qwen layout `IndexError` after the local
+cache workaround. The Phi-3 backup completed sharding but failed because
+BetterTransformer does not support `phi3`. These outcomes connect directly to
+the lecture point that local LLM deployment depends on model architecture,
+format, backend support, OS behavior, memory layout, and paging strategy.
+
+### Quantization
+
+Quantization reduces the number of bits used to store model weights. The direct
+Qwen candidate uses Hugging Face SafeTensors/BF16, while the successful local run
+uses Q4_K_M GGUF through Ollama. On this hardware, that change was decisive:
+the BF16 Transformers path timed out, while the Q4 GGUF path completed the fixed
+prompt successfully in the measured streaming run. The cost is that
+quantization can reduce output quality or model fidelity, but for this short
+technical prompt the Q4 output was usable.
+
+## Limitations
+
+- Only one successful full local inference path was measured: Qwen 2.5 3B
+  Q4_K_M through Ollama.
+- TTFT is available for the successful streaming Ollama run, but not for the
+  failed direct Transformers and AirLLM runs.
+- The direct Transformers and AirLLM runs produced valid failure evidence, but
+  not complete latency/throughput curves.
+- AirLLM was tested through the installed package stack rather than patched
+  internally for Qwen or Phi-3 compatibility.
+- Power draw is an estimate, not a direct wattmeter measurement.
+- API pricing changes over time, so the economic analysis records the pricing
+  date and should be refreshed for future use.
+
+## Recommendation
+
+For this laptop, the recommended local path is quantized GGUF through Ollama or
+a similar GGUF runtime. Direct BF16 Transformers is not practical for Qwen 2.5
+3B on this CPU/RAM-only setup, and the tested AirLLM combinations were blocked
+by backend/model compatibility before generation.
+
+Use local inference when privacy, offline operation, reproducibility,
+experimentation, or high repeated request volume matter. Use an external API
+when quality, low setup effort, bursty usage, or operational reliability matter
+more than keeping inference fully on-prem. Under the assumptions in this report,
+local inference becomes economically attractive only at high volume: roughly
+152,000 similar requests per month for the measured workload.
+
+## Final Conclusion
+
+The main finding is that local LLM feasibility is not determined by parameter
+count alone. On modest hardware, model format, quantization, backend support,
+operating-system behavior, cache layout, and memory movement dominate the
+outcome. Tiny GPT-2 proved the benchmark pipeline, direct Qwen Transformers
+proved the negative full-precision baseline, AirLLM exposed real local
+deployment compatibility issues, and Ollama GGUF Q4 provided the successful
+on-prem inference path.
+
+## Verification
+
+Final non-expensive checks are documented in `docs/VERIFICATION.md`.
+
+Passed:
+
+- `uv run python -m compileall experiments src`
+- `uv run python -m pytest`
+- `uv run ruff check experiments src tests`
+- `uv run python experiments/summarize_results.py`
+- `uv run python experiments/make_figures.py`
+- `uv run python experiments/run_economics.py`
+
+The final evidence is stored in raw JSON/CSV result files and generated SVG
+figures. Screenshots were not needed for the final report because the generated
+artifacts are reproducible and embedded directly in this README.

@@ -28,7 +28,7 @@ The script writes:
 | Hardware lifetime | 36 months |
 | Electricity price | $0.20/kWh |
 | Estimated inference power draw | 45 W |
-| Measured local workload | 23 input tokens, 32 output tokens, 3.4027 seconds |
+| Measured local workload | 23 input tokens, 32 output tokens, 13.4804 seconds |
 
 The API model is an illustrative external-service comparison point, not a claim
 that it is quality-equivalent to Qwen 2.5 3B Q4_K_M.
@@ -38,10 +38,10 @@ that it is quality-equivalent to Qwen 2.5 3B Q4_K_M.
 For the measured GGUF workload:
 
 - API cost per request: about `$0.000161`.
-- Local variable electricity cost per request: about `$0.0000085`.
+- Local variable electricity cost per request: about `$0.0000337`.
 - Local fixed amortized hardware cost: about `$19.44/month`.
-- Break-even without cached input: about `127,301` similar requests/month.
-- Break-even with 80% cached input: about `138,569` similar requests/month.
+- Break-even without cached input: about `152,447` similar requests/month.
+- Break-even with 80% cached input: about `168,893` similar requests/month.
 
 ## Interpretation
 
