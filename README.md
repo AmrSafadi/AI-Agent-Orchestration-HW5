@@ -428,8 +428,9 @@ Quantization reduces the number of bits used to store model weights. The direct
 Qwen candidate uses Hugging Face SafeTensors/BF16, while the successful local run
 uses Q4_K_M GGUF through Ollama. On this hardware, that change was decisive:
 the BF16 Transformers path timed out, while the Q4 GGUF path completed the fixed
-prompt in a few seconds. The cost is that quantization can reduce output quality
-or model fidelity, but for this short technical prompt the Q4 output was usable.
+prompt successfully in the measured streaming run. The cost is that
+quantization can reduce output quality or model fidelity, but for this short
+technical prompt the Q4 output was usable.
 
 ## Limitations
 
