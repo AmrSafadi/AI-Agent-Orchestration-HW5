@@ -76,11 +76,17 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |           `-- process.py
 |-- tests/
 |   |-- conftest.py
+|   |-- test_cli_scripts.py
 |   |-- test_config.py
 |   |-- test_economics.py
+|   |-- test_environment_checks.py
 |   |-- test_metrics.py
 |   |-- test_ollama.py
+|   |-- test_ollama_api.py
+|   |-- test_process_and_wrappers.py
+|   |-- test_reporting_scripts.py
 |   |-- test_runner_results.py
+|   |-- test_runtime_success_paths.py
 |   `-- test_summary.py
 |-- pyproject.toml
 `-- uv.lock
