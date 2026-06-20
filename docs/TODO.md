@@ -100,15 +100,15 @@
 ## Phase 9: Final Report
 
 - [x] Refresh `docs/PLAN.md` to match the current repository.
-- [ ] Write hardware documentation section.
-- [ ] Write model choice justification.
+- [x] Write hardware documentation section.
+- [x] Write model choice justification.
 - [x] Write baseline analysis.
 - [x] Write AirLLM and quantization analysis.
-- [ ] Explain Prefill versus Decode in relation to measurements.
-- [ ] Explain compute-bound versus memory-bound behavior.
-- [ ] Explain AirLLM, virtual memory, paging, and mmap.
+- [x] Explain Prefill versus Decode in relation to measurements.
+- [x] Explain compute-bound versus memory-bound behavior.
+- [x] Explain AirLLM, virtual memory, paging, and mmap.
 - [x] Add economic conclusion.
-- [ ] Add limitations and recommended usage scenarios.
+- [x] Add limitations and recommended usage scenarios.
 - [x] Embed result summary table in `README.md`.
 - [x] Embed Phase 7 figures in `README.md`.
 - [ ] Embed screenshots in `README.md` if useful.
