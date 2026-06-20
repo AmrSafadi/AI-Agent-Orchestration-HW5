@@ -35,7 +35,8 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |   |-- PRD.md
 |   |-- PRD_benchmarking.md
 |   |-- RESULT_SUMMARY.md
-|   `-- TODO.md
+|   |-- TODO.md
+|   `-- VERIFICATION.md
 |-- experiments/
 |   |-- collect_hardware.py
 |   |-- check_backends.py
@@ -405,6 +406,22 @@ proved the negative full-precision baseline, AirLLM exposed real local
 deployment compatibility issues, and Ollama GGUF Q4 provided the successful
 on-prem inference path.
 
-## Remaining Work
+## Verification
 
-- Final verification and submission checklist.
+Final non-expensive checks are documented in `docs/VERIFICATION.md`.
+
+Passed:
+
+- `uv run python -m compileall experiments src`
+- `uv run python experiments/summarize_results.py`
+- `uv run python experiments/make_figures.py`
+- `uv run python experiments/run_economics.py`
+
+Not available in the current environment:
+
+- `uv run python -m pytest`, because `pytest` is not installed and no `tests/`
+  directory exists.
+- `uv run ruff check experiments src`, because `ruff` is not installed.
+
+The final evidence is stored in raw JSON/CSV result files and generated SVG
+figures rather than screenshots.
