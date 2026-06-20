@@ -180,7 +180,7 @@ Final non-expensive verification includes:
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
 | API prices change | Economics can become stale | Record pricing date and assumptions |
-| TTFT is unavailable for Ollama result | Metric table has a null field | Explain that the run used non-streaming API output |
+| TTFT is unavailable for failed runs | Direct Transformers and AirLLM have null fields | Explain that those paths failed before producing a normal inference trace |
 | AirLLM did not complete generation | Fewer comparable performance metrics | Treat failures as backend compatibility evidence |
 | Direct Transformers timed out | No full baseline token metrics | Use timeout as valid negative baseline evidence |
 | README becomes too scattered | Submission clarity suffers | Consolidate final conclusions in README, keep docs as appendices |

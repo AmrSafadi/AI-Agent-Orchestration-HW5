@@ -27,7 +27,7 @@ def main() -> None:
         raise SystemExit(f"Unsupported GGUF backend: {config.backend}")
 
     if args.dry_run:
-        print(json.dumps(_config_as_json(config, args.api_url), indent=2))
+        print(json.dumps(_config_as_json(config, args.api_url, args.stream), indent=2))
         print("\nDry run only; no Ollama request was sent and no output file was written.")
         return
 
@@ -40,6 +40,7 @@ def main() -> None:
         temperature=config.temperature,
         timeout_seconds=config.timeout_seconds,
         api_url=args.api_url,
+        stream=args.stream,
     )
     print(json.dumps(asdict(result), indent=2))
     print(f"\nSaved Ollama/GGUF result to {config.output_path}")
@@ -76,6 +77,11 @@ def _parse_args() -> argparse.Namespace:
         help="Ollama generate endpoint.",
     )
     parser.add_argument(
+        "--stream",
+        action="store_true",
+        help="Use Ollama streaming output so TTFT can be measured.",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Print the resolved config without running Ollama.",
@@ -97,7 +103,7 @@ def _resolve_config(args: argparse.Namespace) -> GGUFRunConfig:
     )
 
 
-def _config_as_json(config: GGUFRunConfig, api_url: str) -> dict[str, object]:
+def _config_as_json(config: GGUFRunConfig, api_url: str, stream: bool) -> dict[str, object]:
     return {
         "backend": config.backend,
         "model_id": config.model_id,
@@ -108,6 +114,7 @@ def _config_as_json(config: GGUFRunConfig, api_url: str) -> dict[str, object]:
         "output_path": str(config.output_path),
         "timeout_seconds": config.timeout_seconds,
         "api_url": api_url,
+        "stream": stream,
     }
 
 

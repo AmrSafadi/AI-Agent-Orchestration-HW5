@@ -1,5 +1,5 @@
 {
-  "run_id": "ollama-gguf-e5c64ad05c07",
+  "run_id": "ollama-gguf-c7dd375e30f0",
   "backend": "ollama",
   "model": "hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M",
   "quantization": "Q4_K_M",
@@ -7,13 +7,13 @@
   "prompt": "Explain the difference between prefill and decode in local LLM inference.",
   "input_tokens": 23,
   "output_tokens": 32,
-  "ttft_seconds": null,
-  "tpot_seconds": 0.0937,
-  "tokens_per_second": 10.6684,
-  "total_runtime_seconds": 3.4027,
-  "peak_ram_mb": 2410.01,
+  "ttft_seconds": 6.3538,
+  "tpot_seconds": 0.224,
+  "tokens_per_second": 4.4649,
+  "total_runtime_seconds": 13.4804,
+  "peak_ram_mb": 2347.17,
   "peak_vram_mb": null,
-  "output_sample": "In the context of Local Large Language Model (LLM) inference, \"prefill\" and \"decode\" are two distinct phases involved in generating a response from",
+  "output_sample": "In the context of local Large Language Model (LLM) inference, \"prefill\" and \"decode\" are two distinct steps that occur during the process of",
   "error": null,
-  "notes": "Ollama/GGUF was run through the local /api/generate endpoint with stream=false. TTFT is null because the non-streaming API response does not expose first-token timing. Measured wall-clock request time: 3.5246 seconds. Prompt eval duration: 0.1286 seconds. Load duration: 0.2683 seconds."
+  "notes": "Ollama/GGUF was run through the local /api/generate endpoint with stream=true. TTFT was measured from the first streamed response chunk. Measured wall-clock request time: 13.5825 seconds. Prompt eval duration: 0.6047 seconds. Load duration: 5.6963 seconds."
 }

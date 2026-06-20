@@ -57,6 +57,8 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |-- src/
 |   `-- airllm_benchmark/
 |       |-- __init__.py
+|       |-- backends.py
+|       |-- config.py
 |       |-- hardware.py
 |       |-- metrics.py
 |       `-- runners/
@@ -64,6 +66,12 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |           |-- airllm.py
 |           |-- baseline.py
 |           `-- ollama.py
+|-- tests/
+|   |-- conftest.py
+|   |-- test_config.py
+|   |-- test_economics.py
+|   |-- test_ollama.py
+|   `-- test_summary.py
 |-- pyproject.toml
 `-- uv.lock
 ```
@@ -111,7 +119,7 @@ The Ollama/GGUF run requires a local Ollama service and the selected GGUF model:
 ```powershell
 ollama --version
 ollama pull hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M
-uv run python experiments/run_ollama.py --config config/experiment.example.json
+uv run python experiments/run_ollama.py --config config/experiment.example.json --stream
 ```
 
 Expected outputs are written to `results/*.json`, `results/*.csv`, and
@@ -247,9 +255,9 @@ result is stored in:
 results/gguf_qwen2_5_3b_instruct_q4_k_m.json
 ```
 
-Key result: 32 output tokens, 10.6684 tokens/second, 3.4027 seconds total
-runtime, and 2410.01 MB peak RAM across the Ollama runtime processes. The
-details are documented in `docs/GGUF_RESULTS.md`.
+Key result: 32 output tokens, 6.3538 seconds TTFT, 4.4649 tokens/second,
+13.4804 seconds total runtime, and 2347.17 MB peak RAM across the Ollama runtime
+processes. The details are documented in `docs/GGUF_RESULTS.md`.
 
 ## Result Summary
 
@@ -265,7 +273,7 @@ uv run python experiments/summarize_results.py
 | Direct Qwen Transformers | transformers | `Qwen/Qwen2.5-3B-Instruct` | n/a | timeout | 900 | n/a | n/a | Timed out after 900 seconds |
 | AirLLM Qwen | airllm | `Qwen/Qwen2.5-3B-Instruct` | n/a | failed | n/a | n/a | n/a | `IndexError: list index out of range` |
 | AirLLM Phi-3 backup | airllm | `microsoft/Phi-3-mini-4k-instruct` | n/a | failed | n/a | n/a | n/a | BetterTransformer does not support `phi3` |
-| Ollama GGUF Q4 | ollama | `hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` | Q4_K_M | success | 3.4027 | 10.6684 | 2410.01 | Completed 32 output tokens |
+| Ollama GGUF Q4 | ollama | `hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` | Q4_K_M | success | 13.4804 | 4.4649 | 2347.17 | Completed 32 output tokens |
 
 The same table and interpretation are kept in `docs/RESULT_SUMMARY.md`.
 
@@ -314,10 +322,10 @@ months, $0.20/kWh electricity, and a 45 W estimated inference power draw.
 
 For the measured GGUF workload of 23 input tokens and 32 output tokens, the API
 request cost is about $0.000161. The local variable electricity cost is about
-$0.0000085 per request, but the amortized hardware cost is about $19.44 per
-month. Under these assumptions, local inference breaks even at about 127,000
+$0.0000337 per request, but the amortized hardware cost is about $19.44 per
+month. Under these assumptions, local inference breaks even at about 152,000
 similar requests per month. With 80% cached input tokens, the API request cost
-falls slightly and break-even moves to about 139,000 requests per month.
+falls slightly and break-even moves to about 169,000 requests per month.
 
 ![Cost break-even](figures/cost_break_even.svg)
 
@@ -346,11 +354,11 @@ format, backend implementation, dependency version, operating-system behavior,
 and memory strategy.
 
 The successful Ollama GGUF Q4 run is the strongest result. It used the same
-fixed prompt and 32-token generation target, completed in 3.4027 seconds, and
-produced 10.6684 output tokens per second with about 2.4 GB peak RAM. On this
-hardware, quantization and a runtime designed for GGUF had a larger practical
-impact than attempting direct full-precision Transformers execution or the
-tested AirLLM model combinations.
+fixed prompt and 32-token generation target, completed in 13.4804 seconds,
+measured TTFT at 6.3538 seconds, and produced 4.4649 output tokens per second
+with about 2.3 GB peak RAM. On this hardware, quantization and a runtime
+designed for GGUF had a larger practical impact than attempting direct
+full-precision Transformers execution or the tested AirLLM model combinations.
 
 ## Lecture Concept Analysis
 
@@ -363,12 +371,12 @@ In decode, the model generates one token at a time. Each new token depends on
 the previous token, so this phase is more sequential and repeatedly touches
 model weights and KV cache.
 
-The successful Ollama result used a non-streaming local API call, so
-`ttft_seconds` is recorded as `null`; the API response did not expose first-token
-timing. The available decode-related metric is `tpot_seconds = 0.0937`, or about
-10.6684 output tokens per second. The direct Transformers and AirLLM runs did
-not complete generation, so their missing TTFT/TPOT fields are part of the
-evidence: those paths failed before producing a normal inference trace.
+The successful Ollama result used streaming output from the local API, so
+`ttft_seconds` is recorded as 6.3538 seconds. The decode-related metric is
+`tpot_seconds = 0.224`, or about 4.4649 output tokens per second. The direct
+Transformers and AirLLM runs did not complete generation, so their missing
+TTFT/TPOT fields are part of the evidence: those paths failed before producing a
+normal inference trace.
 
 ### Compute-Bound Versus Memory-Bound
 
@@ -427,7 +435,8 @@ or model fidelity, but for this short technical prompt the Q4 output was usable.
 
 - Only one successful full local inference path was measured: Qwen 2.5 3B
   Q4_K_M through Ollama.
-- The successful Ollama call was non-streaming, so TTFT could not be measured.
+- TTFT is available for the successful streaming Ollama run, but not for the
+  failed direct Transformers and AirLLM runs.
 - The direct Transformers and AirLLM runs produced valid failure evidence, but
   not complete latency/throughput curves.
 - AirLLM was tested through the installed package stack rather than patched
@@ -448,7 +457,7 @@ experimentation, or high repeated request volume matter. Use an external API
 when quality, low setup effort, bursty usage, or operational reliability matter
 more than keeping inference fully on-prem. Under the assumptions in this report,
 local inference becomes economically attractive only at high volume: roughly
-127,000 similar requests per month for the measured workload.
+152,000 similar requests per month for the measured workload.
 
 ## Final Conclusion
 

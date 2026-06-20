@@ -15,9 +15,9 @@ def test_economics_summary_matches_reported_break_even() -> None:
     costs = summary["costs"]
 
     assert costs["api_usd_per_request"] == 0.00016125
-    assert costs["local_variable_usd_per_request"] == 0.00000851
-    assert costs["break_even_requests_per_month"] == 127301
-    assert costs["cached_break_even_requests_per_month"] == 138569
+    assert costs["local_variable_usd_per_request"] == 0.00003370
+    assert costs["break_even_requests_per_month"] == 152447
+    assert costs["cached_break_even_requests_per_month"] == 168893
 
 
 def test_cost_curve_contains_expected_volume_points() -> None:

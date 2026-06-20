@@ -30,15 +30,16 @@ installed executable path.
 | Temperature | 0.2 |
 | Input tokens | 23 |
 | Output tokens | 32 |
-| Total runtime | 3.4027 seconds |
-| Tokens per second | 10.6684 |
-| Time per output token | 0.0937 seconds |
-| Peak RAM | 2410.01 MB |
+| Time to first token | 6.3538 seconds |
+| Total runtime | 13.4804 seconds |
+| Tokens per second | 4.4649 |
+| Time per output token | 0.224 seconds |
+| Peak RAM | 2347.17 MB |
 | Peak VRAM | null; CPU/local system-memory path |
 
-The run used Ollama's local `/api/generate` endpoint with `stream=false`.
-Because the API call was non-streaming, first-token latency is not available in
-the result and `ttft_seconds` is recorded as `null`.
+The run used Ollama's local `/api/generate` endpoint with `stream=true`.
+Streaming output made first-token latency measurable, so `ttft_seconds` is
+recorded as 6.3538 seconds.
 
 ## Interpretation
 
@@ -46,8 +47,8 @@ This is the strongest positive local-inference result so far:
 
 - Direct BF16 Transformers for Qwen 3B timed out after 900 seconds.
 - AirLLM made useful progress but failed on model/backend compatibility issues.
-- Q4 GGUF through Ollama completed the same prompt successfully in a few
-  seconds and used about 2.4 GB of RAM for the local runtime processes.
+- Q4 GGUF through Ollama completed the same prompt successfully and used about
+  2.3 GB of RAM for the local runtime processes.
 
 The result supports the main quantization conclusion for the report: on this
 CPU/RAM-only laptop, changing model format and quantization level had a larger
