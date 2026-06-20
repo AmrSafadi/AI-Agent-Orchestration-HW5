@@ -13,8 +13,8 @@ It avoids rerunning large model downloads or expensive inference jobs.
 | Result table generation | `uv run python experiments/summarize_results.py` | Passed |
 | Figure regeneration | `uv run python experiments/make_figures.py` | Passed |
 | Economic artifact regeneration | `uv run python experiments/run_economics.py` | Passed |
-| Unit tests | `uv run python -m pytest` | Not available; `pytest` is not installed and no `tests/` directory exists |
-| Linting | `uv run ruff check experiments src` | Not available; `ruff` is not installed in the environment |
+| Unit tests | `uv run python -m pytest` | Passed, 8 tests |
+| Linting | `uv run ruff check experiments src tests` | Passed |
 | Secret scan | `rg -n "api[_-]?key|hf_token|huggingface.*token|OPENAI_API_KEY|ANTHROPIC|sk-|hf_[A-Za-z0-9]" .` | No committed secrets found; hits are config field names, package names, and documentation references |
 
 ## Deliverable Check
@@ -31,6 +31,7 @@ It avoids rerunning large model downloads or expensive inference jobs.
 | Figures | `figures/*.svg` |
 | Reproducible scripts | `experiments/*.py` |
 | Source package | `src/airllm_benchmark/` |
+| Tests | `tests/*.py` |
 
 ## Notes
 

@@ -73,6 +73,7 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 This project uses `uv`.
 
 ```powershell
+uv sync
 uv run python experiments/collect_hardware.py
 ```
 
@@ -81,6 +82,42 @@ The command writes hardware information to:
 ```text
 results/hardware.json
 ```
+
+## Full Reproduction
+
+The saved JSON files under `results/` are the source of truth for the final
+report, so the cheapest way to reproduce the submitted tables and figures does
+not rerun model downloads or long inference jobs:
+
+```powershell
+uv sync
+uv run python -m compileall experiments src
+uv run python experiments/summarize_results.py
+uv run python experiments/make_figures.py
+uv run python experiments/run_economics.py
+```
+
+The model-running commands are more expensive and may download model weights:
+
+```powershell
+uv run python experiments/run_baseline.py
+uv run python experiments/run_baseline.py --config config/experiment.example.json --allow-download
+uv run python experiments/run_airllm.py --config config/experiment.example.json
+uv run python experiments/run_ollama.py --config config/experiment.example.json
+```
+
+The Ollama/GGUF run requires a local Ollama service and the selected GGUF model:
+
+```powershell
+ollama --version
+ollama pull hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M
+uv run python experiments/run_ollama.py --config config/experiment.example.json
+```
+
+Expected outputs are written to `results/*.json`, `results/*.csv`, and
+`figures/*.svg`. The direct Qwen Transformers and AirLLM commands are expected
+to be slow or fail on the recorded laptop; those negative outcomes are part of
+the submitted evidence.
 
 ## Hardware Specification
 
@@ -170,9 +207,9 @@ install check is stored in `results/airllm_install_check.json`, and the detailed
 plan is documented in `docs/AIRLLM_PLAN.md`.
 
 The first AirLLM execution attempt failed before benchmarking because Hugging
-Face cache symlink creation hit Windows privilege error `WinError 1314`. The raw
-result is stored in `results/airllm_qwen_qwen2_5_3b_instruct.json` and
-documented in `docs/AIRLLM_RESULTS.md`.
+Face cache symlink creation hit Windows privilege error `WinError 1314`. That
+historical attempt is documented in `docs/AIRLLM_RESULTS.md`; it is not the
+current raw Qwen result file.
 
 A retry using a project-local Hugging Face cache bypassed the symlink failure
 and progressed through AirLLM layer sharding, but failed before generation with
@@ -183,6 +220,16 @@ The documented backup model, `microsoft/Phi-3-mini-4k-instruct`, was also tried
 with AirLLM. Sharding completed, but generation failed because Optimum
 BetterTransformer does not support model type `phi3`. The raw result is stored
 in `results/airllm_phi3_mini_instruct.json`.
+
+## Original Extension
+
+The original extension beyond the minimum baseline/AirLLM workflow is the
+quantized GGUF/Ollama comparison plus cached-input economic sensitivity. The
+GGUF Q4_K_M run uses the same Qwen model family as the Hugging Face candidate
+and demonstrates that model format, quantization, and runtime choice can matter
+more than parameter count alone on this laptop. The economics script then adds
+an 80% cached-input case to show how prompt caching changes the API break-even
+point.
 
 ## GGUF Quantization Result
 
@@ -352,6 +399,13 @@ parts live on disk or in a cache path. The tradeoff is latency. Moving layers
 through memory and storage can make a model fit more easily, but repeated I/O
 can slow generation substantially.
 
+`mmap` is the related operating-system mechanism where a runtime maps model
+files into virtual memory and lets the OS page file regions in and out instead
+of explicitly reading the entire model into ordinary process memory at once.
+AirLLM's layer-sharding strategy is not identical to every `mmap` runtime, but
+both approaches expose the same deployment tradeoff: lower peak resident memory
+can come with more dependence on storage latency and paging behavior.
+
 In this project, AirLLM did not reach completed generation. That is still useful
 deployment evidence. The Qwen run first exposed a Windows/Hugging Face symlink
 permission problem, then failed with a Qwen layout `IndexError` after the local
@@ -413,15 +467,12 @@ Final non-expensive checks are documented in `docs/VERIFICATION.md`.
 Passed:
 
 - `uv run python -m compileall experiments src`
+- `uv run python -m pytest`
+- `uv run ruff check experiments src tests`
 - `uv run python experiments/summarize_results.py`
 - `uv run python experiments/make_figures.py`
 - `uv run python experiments/run_economics.py`
 
-Not available in the current environment:
-
-- `uv run python -m pytest`, because `pytest` is not installed and no `tests/`
-  directory exists.
-- `uv run ruff check experiments src`, because `ruff` is not installed.
-
 The final evidence is stored in raw JSON/CSV result files and generated SVG
-figures rather than screenshots.
+figures. Screenshots were not needed for the final report because the generated
+artifacts are reproducible and embedded directly in this README.

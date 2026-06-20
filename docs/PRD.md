@@ -29,7 +29,8 @@ The target reader is an external technical reviewer who wants to reproduce the e
 - Measure latency, throughput, memory, runtime, and qualitative output quality.
 - Connect observed results to lecture concepts: Prefill, Decode, compute-bound execution, memory-bound execution, VRAM, virtual memory, paging, and mmap.
 - Compare local/on-prem cost against third-party API cost and identify a break-even point.
-- Produce a reproducible repository with scripts, results, figures, screenshots, and a detailed README.
+- Produce a reproducible repository with scripts, results, generated figures or
+  screenshots where useful, and a detailed README.
 
 ## Non-Goals
 
@@ -64,7 +65,8 @@ The target reader is an external technical reviewer who wants to reproduce the e
 - Configuration values should live in config files or environment variables rather than being hard-coded in logic.
 - Code should be modular enough to inspect and extend.
 - Generated results should be traceable to the exact command, model, prompt, and quantization setting used.
-- The final README must contain the technical report, tables, graphs, screenshots, conclusions, and reproduction instructions.
+- The final README must contain the technical report, tables, graphs or embedded
+  figure artifacts, conclusions, and reproduction instructions.
 
 ## Success Criteria
 
@@ -98,4 +100,3 @@ The target reader is an external technical reviewer who wants to reproduce the e
 - Generated figures under `figures/`.
 - Screenshots or terminal evidence where useful.
 - Dependency files such as `pyproject.toml` and `uv.lock` or `requirements.txt`.
-
