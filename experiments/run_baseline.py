@@ -10,6 +10,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
+DEFAULT_MAIN_PROMPT = "Explain the difference between prefill and decode in local LLM inference."
 
 from airllm_benchmark.config import BaselineRunConfig, load_baseline_config
 from airllm_benchmark.runners.baseline import (
@@ -24,6 +25,10 @@ def main() -> None:
 
     if args.config is None and args.model_id is None:
         output_path = PROJECT_ROOT / "results" / "baseline_tiny_gpt2.json"
+        if args.dry_run:
+            print(json.dumps(_tiny_config_as_json(output_path), indent=2))
+            print("\nDry run only; no model was loaded and no output file was written.")
+            return
         result = run_tiny_gpt2_baseline(output_path)
         print(json.dumps(asdict(result), indent=2))
         print(f"\nSaved tiny baseline result to {output_path}")
@@ -88,7 +93,7 @@ def _resolve_config(args: argparse.Namespace) -> BaselineRunConfig:
     if args.config is None:
         config = BaselineRunConfig(
             model_id=args.model_id,
-            prompt=args.prompt or "Explain the difference between prefill and decode in local LLM inference.",
+            prompt=args.prompt or DEFAULT_MAIN_PROMPT,
             max_new_tokens=args.max_new_tokens or 64,
             temperature=0.0 if args.temperature is None else args.temperature,
             output_path=args.output or PROJECT_ROOT / "results" / "baseline_override.json",
@@ -121,6 +126,18 @@ def _config_as_json(config: BaselineRunConfig) -> dict[str, object]:
         "output_path": str(config.output_path),
         "local_files_only": config.local_files_only,
         "timeout_seconds": config.timeout_seconds,
+    }
+
+
+def _tiny_config_as_json(output_path: Path) -> dict[str, object]:
+    return {
+        "model_id": "sshleifer/tiny-gpt2",
+        "prompt": "Local LLM benchmarking checks",
+        "max_new_tokens": 8,
+        "temperature": 0.0,
+        "output_path": str(output_path),
+        "local_files_only": False,
+        "timeout_seconds": None,
     }
 
 

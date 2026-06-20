@@ -13,9 +13,10 @@ It avoids rerunning large model downloads or expensive inference jobs.
 | Result table generation | `uv run python experiments/summarize_results.py` | Passed |
 | Figure regeneration | `uv run python experiments/make_figures.py` | Passed |
 | Economic artifact regeneration | `uv run python experiments/run_economics.py` | Passed |
-| Unit tests | `uv run python -m pytest` | Passed, 9 tests |
+| Unit tests | `uv run python -m pytest` | Passed, 40 tests |
+| Coverage report | `uv run python -m pytest --cov=src --cov=experiments --cov-report=term-missing` | Passed, 87% line coverage with `fail_under = 85`; tests use mocks for expensive model/backend paths |
 | Linting | `uv run ruff check experiments src tests` | Passed |
-| Secret scan | `rg -n "api[_-]?key|hf_token|huggingface.*token|OPENAI_API_KEY|ANTHROPIC|sk-|hf_[A-Za-z0-9]" .` | No committed secrets found; hits are config field names, package names, and documentation references |
+| Secret scan | `rg -n "api[_-]?key|hf_token|huggingface.*token|OPENAI_API_KEY|ANTHROPIC|sk-|hf_[A-Za-z0-9]" .` | No committed secrets found; hits are placeholders, config field names, package names, and documentation references |
 
 ## Deliverable Check
 
@@ -23,6 +24,8 @@ It avoids rerunning large model downloads or expensive inference jobs.
 | --- | --- |
 | Main report | `README.md` |
 | Planning docs | `docs/PRD.md`, `docs/PLAN.md`, `docs/TODO.md`, `docs/PRD_benchmarking.md` |
+| Prompt log | `docs/PROMPT_LOG.md` |
+| Environment template | `.env.example` |
 | Hardware capture | `results/hardware.json` |
 | Baseline results | `results/baseline_tiny_gpt2.json`, `results/baseline_qwen_qwen2_5_3b_instruct.json` |
 | AirLLM results | `results/airllm_qwen_qwen2_5_3b_instruct.json`, `results/airllm_phi3_mini_instruct.json` |

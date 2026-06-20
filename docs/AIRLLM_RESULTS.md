@@ -40,12 +40,12 @@ result yet. It still matters for the assignment because local/on-prem deployment
 depends on operating-system behavior, filesystem permissions, and model-cache
 layout, not only Python model code.
 
-The next retry should avoid requiring symlink privileges. Preferred mitigations:
+The retry avoided requiring symlink privileges. The mitigation used:
 
-- Configure Hugging Face cache behavior/environment for Windows-safe downloads.
-- Prefer a local model/cache path that avoids symlink creation if possible.
-- Avoid requiring administrator privileges or Windows Developer Mode unless
-  documented as an optional workaround.
+- Project-local Hugging Face cache behavior/environment for Windows-safe
+  downloads.
+- A local model/cache path that avoids symlink creation.
+- No requirement for administrator privileges or Windows Developer Mode.
 
 ## Mitigation Smoke Retry
 

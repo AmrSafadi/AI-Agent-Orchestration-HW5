@@ -1,9 +1,10 @@
 import importlib.util
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location("run_economics", ROOT / "experiments" / "run_economics.py")
+SPEC = importlib.util.spec_from_file_location(
+    "run_economics", ROOT / "experiments" / "run_economics.py"
+)
 assert SPEC is not None
 run_economics = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None

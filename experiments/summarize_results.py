@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RESULTS = [
     PROJECT_ROOT / "results" / "baseline_tiny_gpt2.json",

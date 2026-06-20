@@ -7,6 +7,7 @@
 - [x] Create `docs/TODO.md`.
 - [x] Create `docs/PRD_benchmarking.md`.
 - [x] Create model selection note.
+- [x] Create prompt log.
 - [x] Create initial `README.md` report shell.
 
 ## Phase 2: Project Skeleton

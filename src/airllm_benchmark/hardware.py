@@ -10,7 +10,7 @@ import shutil
 import subprocess
 import sys
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -33,7 +33,7 @@ def collect_hardware_report(root: Path | None = None) -> HardwareReport:
 
     project_root = root or Path.cwd()
     return HardwareReport(
-        collected_at_utc=datetime.now(timezone.utc).isoformat(),
+        collected_at_utc=datetime.now(UTC).isoformat(),
         platform=_platform_info(),
         python=_python_info(),
         cpu=_cpu_info(),
@@ -102,7 +102,7 @@ def _gpu_info() -> list[dict[str, Any]]:
 def _disk_info(project_root: Path) -> list[dict[str, Any]]:
     roots = {project_root.anchor or str(project_root.resolve().drive)}
     if platform.system() == "Windows":
-        system_drive = os.environ.get("SystemDrive")
+        system_drive = os.environ.get("SYSTEMDRIVE")
         if system_drive:
             roots.add(f"{system_drive}\\")
 
@@ -244,4 +244,3 @@ def _bytes_to_gb(value: int | None) -> float | None:
     if value is None:
         return None
     return round(value / (1024**3), 2)
-

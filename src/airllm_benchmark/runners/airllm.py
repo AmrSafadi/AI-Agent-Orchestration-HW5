@@ -3,22 +3,17 @@
 from __future__ import annotations
 
 import multiprocessing as mp
-import os
-import sys
-import time
 from pathlib import Path
-from queue import Empty
 
 from airllm_benchmark.metrics import (
     BenchmarkResult,
-    ChildProcessMemorySampler,
-    ProcessMemorySampler,
     compact_notes,
     error_text,
     new_run_id,
-    safe_round,
     write_benchmark_result,
 )
+from airllm_benchmark.runners.airllm_runtime import run_airllm_success_path
+from airllm_benchmark.runners.process import run_with_timeout
 
 DEFAULT_AIRLLM_TIMEOUT_SECONDS = 1800
 
@@ -39,302 +34,115 @@ def run_airllm_baseline(
     """Run AirLLM with timeout and failure capture."""
 
     run_id = new_run_id("airllm")
+    kwargs = {
+        "run_id": run_id,
+        "model_id": model_id,
+        "prompt": prompt,
+        "max_new_tokens": max_new_tokens,
+        "temperature": temperature,
+        "layer_shards_saving_path": layer_shards_saving_path,
+        "huggingface_cache_dir": huggingface_cache_dir,
+        "compression": compression,
+        "delete_original": delete_original,
+    }
     if timeout_seconds is None:
-        result = _run_airllm_with_error_capture(
-            run_id=run_id,
-            model_id=model_id,
-            prompt=prompt,
-            max_new_tokens=max_new_tokens,
-            temperature=temperature,
-            layer_shards_saving_path=layer_shards_saving_path,
-            huggingface_cache_dir=huggingface_cache_dir,
-            compression=compression,
-            delete_original=delete_original,
-        )
+        result = _run_airllm_with_error_capture(**kwargs)
     else:
-        result = _run_airllm_with_timeout(
-            run_id=run_id,
-            model_id=model_id,
-            prompt=prompt,
-            max_new_tokens=max_new_tokens,
-            temperature=temperature,
-            layer_shards_saving_path=layer_shards_saving_path,
-            huggingface_cache_dir=huggingface_cache_dir,
-            compression=compression,
-            delete_original=delete_original,
+        result = run_with_timeout(
+            worker=_run_airllm_worker,
+            worker_kwargs=kwargs,
             timeout_seconds=timeout_seconds,
+            timeout_result=lambda peak: _timeout_result(
+                run_id, model_id, prompt, compression, timeout_seconds, peak
+            ),
+            empty_result=lambda code, peak: _empty_result(
+                run_id, model_id, prompt, compression, code, peak, layer_shards_saving_path
+            ),
+            sample_memory=True,
         )
 
     write_benchmark_result(result, output_path)
     return result
 
 
-def _run_airllm_with_timeout(
-    *,
-    run_id: str,
-    model_id: str,
-    prompt: str,
-    max_new_tokens: int,
-    temperature: float,
-    layer_shards_saving_path: Path,
-    huggingface_cache_dir: Path,
-    compression: str | None,
-    delete_original: bool,
-    timeout_seconds: int,
-) -> BenchmarkResult:
-    queue: mp.Queue[BenchmarkResult] = mp.Queue(maxsize=1)
-    process = mp.Process(
-        target=_run_airllm_worker,
-        kwargs={
-            "queue": queue,
-            "run_id": run_id,
-            "model_id": model_id,
-            "prompt": prompt,
-            "max_new_tokens": max_new_tokens,
-            "temperature": temperature,
-            "layer_shards_saving_path": layer_shards_saving_path,
-            "huggingface_cache_dir": huggingface_cache_dir,
-            "compression": compression,
-            "delete_original": delete_original,
-        },
-    )
-    process.start()
-    with ChildProcessMemorySampler(process.pid) as memory:
-        process.join(timeout_seconds)
-        peak_ram_mb = memory.peak_ram_mb
+def _run_airllm_worker(queue: mp.Queue[BenchmarkResult], **kwargs: object) -> None:
+    queue.put(_run_airllm_with_error_capture(**kwargs))
 
-    if process.is_alive():
-        process.terminate()
-        process.join(timeout=5)
-        peak_ram_mb = memory.peak_ram_mb or peak_ram_mb
-        return BenchmarkResult(
-            run_id=run_id,
-            backend="airllm",
-            model=model_id,
-            quantization=compression,
-            status="timeout",
-            prompt=prompt,
-            input_tokens=None,
-            output_tokens=None,
-            ttft_seconds=None,
-            tpot_seconds=None,
-            tokens_per_second=None,
-            total_runtime_seconds=float(timeout_seconds),
-            peak_ram_mb=peak_ram_mb,
-            peak_vram_mb=None,
-            output_sample=None,
-            error=f"Timed out after {timeout_seconds} seconds.",
-            notes=compact_notes(
-                [
-                    "The AirLLM worker was terminated after exceeding the configured timeout.",
-                    f"Layer shards path: {layer_shards_saving_path}",
-                    f"Hugging Face cache path: {huggingface_cache_dir}",
-                ]
-            ),
-        )
 
+def _run_airllm_with_error_capture(**kwargs: object) -> BenchmarkResult:
     try:
-        return queue.get(timeout=1)
-    except Empty:
-        return BenchmarkResult(
-            run_id=run_id,
-            backend="airllm",
-            model=model_id,
-            quantization=compression,
-            status="failed",
-            prompt=prompt,
-            input_tokens=None,
-            output_tokens=None,
-            ttft_seconds=None,
-            tpot_seconds=None,
-            tokens_per_second=None,
-            total_runtime_seconds=None,
-            peak_ram_mb=peak_ram_mb,
-            peak_vram_mb=None,
-            output_sample=None,
-            error=f"Worker exited with code {process.exitcode} before returning a result.",
-            notes=f"Layer shards path: {layer_shards_saving_path}",
-        )
-
-
-def _run_airllm_worker(
-    *,
-    queue: mp.Queue[BenchmarkResult],
-    run_id: str,
-    model_id: str,
-    prompt: str,
-    max_new_tokens: int,
-    temperature: float,
-    layer_shards_saving_path: Path,
-    huggingface_cache_dir: Path,
-    compression: str | None,
-    delete_original: bool,
-) -> None:
-    result = _run_airllm_with_error_capture(
-        run_id=run_id,
-        model_id=model_id,
-        prompt=prompt,
-        max_new_tokens=max_new_tokens,
-        temperature=temperature,
-        layer_shards_saving_path=layer_shards_saving_path,
-        huggingface_cache_dir=huggingface_cache_dir,
-        compression=compression,
-        delete_original=delete_original,
-    )
-    queue.put(result)
-
-
-def _run_airllm_with_error_capture(
-    *,
-    run_id: str,
-    model_id: str,
-    prompt: str,
-    max_new_tokens: int,
-    temperature: float,
-    layer_shards_saving_path: Path,
-    huggingface_cache_dir: Path,
-    compression: str | None,
-    delete_original: bool,
-) -> BenchmarkResult:
-    try:
-        return _run_airllm_success_path(
-            run_id=run_id,
-            model_id=model_id,
-            prompt=prompt,
-            max_new_tokens=max_new_tokens,
-            temperature=temperature,
-            layer_shards_saving_path=layer_shards_saving_path,
-            huggingface_cache_dir=huggingface_cache_dir,
-            compression=compression,
-            delete_original=delete_original,
-        )
+        return run_airllm_success_path(**kwargs)
     except Exception as exc:  # pragma: no cover - depends on AirLLM/model behavior
-        return BenchmarkResult(
-            run_id=run_id,
-            backend="airllm",
-            model=model_id,
-            quantization=compression,
-            status="failed",
-            prompt=prompt,
-            input_tokens=None,
-            output_tokens=None,
-            ttft_seconds=None,
-            tpot_seconds=None,
-            tokens_per_second=None,
-            total_runtime_seconds=None,
-            peak_ram_mb=None,
-            peak_vram_mb=None,
-            output_sample=None,
-            error=error_text(exc),
-            notes=compact_notes(
+        return _failed_result(
+            kwargs["run_id"],
+            kwargs["model_id"],
+            kwargs["prompt"],
+            kwargs["compression"],
+            error_text(exc),
+            compact_notes(
                 [
                     "AirLLM failed before producing a complete benchmark.",
-                    f"Layer shards path: {layer_shards_saving_path}",
-                    f"Hugging Face cache path: {huggingface_cache_dir}",
+                    f"Layer shards path: {kwargs['layer_shards_saving_path']}",
+                    f"Hugging Face cache path: {kwargs['huggingface_cache_dir']}",
                 ]
             ),
         )
 
 
-def _run_airllm_success_path(
-    *,
+def _timeout_result(
     run_id: str,
     model_id: str,
     prompt: str,
-    max_new_tokens: int,
-    temperature: float,
-    layer_shards_saving_path: Path,
-    huggingface_cache_dir: Path,
     compression: str | None,
-    delete_original: bool,
+    timeout_seconds: int,
+    peak_ram_mb: float | None,
 ) -> BenchmarkResult:
-    import torch
-    from airllm import AutoModel
-
-    _configure_huggingface_cache(huggingface_cache_dir)
-    layer_shards_saving_path.mkdir(parents=True, exist_ok=True)
-    start = time.perf_counter()
-    with ProcessMemorySampler() as memory:
-        model = AutoModel.from_pretrained(
-            model_id,
-            device="cpu",
-            dtype=torch.float32,
-            layer_shards_saving_path=str(layer_shards_saving_path),
-            compression=compression,
-            delete_original=delete_original,
-            prefetching=False,
-        )
-        tokenizer = model.tokenizer
-        inputs = tokenizer(prompt, return_tensors="pt")
-        input_tokens = int(inputs["input_ids"].shape[-1])
-
-        generation_kwargs = {
-            "max_new_tokens": max_new_tokens,
-            "pad_token_id": tokenizer.eos_token_id,
-        }
-        if temperature > 0:
-            generation_kwargs["do_sample"] = True
-            generation_kwargs["temperature"] = temperature
-        else:
-            generation_kwargs["do_sample"] = False
-
-        generation_start = time.perf_counter()
-        with torch.no_grad():
-            output_ids = model.generate(inputs["input_ids"], **generation_kwargs)
-        generation_seconds = time.perf_counter() - generation_start
-        total_seconds = time.perf_counter() - start
-
-    generated_ids = output_ids[0][input_tokens:]
-    output_tokens = int(generated_ids.shape[-1])
-    output_text = tokenizer.decode(generated_ids, skip_special_tokens=True).strip()
-    tokens_per_second = output_tokens / generation_seconds if generation_seconds > 0 else None
-    tpot_seconds = generation_seconds / output_tokens if output_tokens else None
-
-    return BenchmarkResult(
-        run_id=run_id,
-        backend="airllm",
-        model=model_id,
-        quantization=compression,
-        status="success",
-        prompt=prompt,
-        input_tokens=input_tokens,
-        output_tokens=output_tokens,
-        ttft_seconds=None,
-        tpot_seconds=safe_round(tpot_seconds),
-        tokens_per_second=safe_round(tokens_per_second),
-        total_runtime_seconds=safe_round(total_seconds),
-        peak_ram_mb=memory.peak_ram_mb,
-        peak_vram_mb=None,
-        output_sample=output_text,
-        error=None,
-        notes=compact_notes(
-            [
-                "TTFT is null because this non-streaming AirLLM runner measures total generation only.",
-                f"Layer shards path: {layer_shards_saving_path}",
-                f"Hugging Face cache path: {huggingface_cache_dir}",
-                f"Compression: {compression or 'none'}",
-            ]
-        ),
+    return _failed_result(
+        run_id,
+        model_id,
+        prompt,
+        compression,
+        f"Timed out after {timeout_seconds} seconds.",
+        "The AirLLM worker was terminated after exceeding the configured timeout.",
+        status="timeout",
+        total_runtime_seconds=float(timeout_seconds),
+        peak_ram_mb=peak_ram_mb,
     )
 
 
-def _configure_huggingface_cache(cache_dir: Path) -> None:
-    """Use a project-local Hugging Face cache and avoid Windows symlink privileges."""
+def _empty_result(
+    run_id: str,
+    model_id: str,
+    prompt: str,
+    compression: str | None,
+    exitcode: int | None,
+    peak_ram_mb: float | None,
+    layer_shards_saving_path: Path,
+) -> BenchmarkResult:
+    return _failed_result(
+        run_id,
+        model_id,
+        prompt,
+        compression,
+        f"Worker exited with code {exitcode} before returning a result.",
+        f"Layer shards path: {layer_shards_saving_path}",
+        peak_ram_mb=peak_ram_mb,
+    )
 
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    hub_cache_dir = cache_dir / "hub"
-    hub_cache_dir.mkdir(parents=True, exist_ok=True)
 
-    os.environ["HF_HOME"] = str(cache_dir)
-    os.environ["HF_HUB_CACHE"] = str(hub_cache_dir)
-    os.environ["TRANSFORMERS_CACHE"] = str(hub_cache_dir)
-    os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
-
-    import huggingface_hub.constants as hf_constants
-    import huggingface_hub.file_download as hf_file_download
-
-    hf_constants.HF_HOME = str(cache_dir)
-    hf_constants.HF_HUB_CACHE = str(hub_cache_dir)
-
-    if sys.platform == "win32":
-        hf_file_download.are_symlinks_supported = lambda cache_dir=None: False
+def _failed_result(
+    run_id: object,
+    model_id: object,
+    prompt: object,
+    compression: object,
+    error: str,
+    notes: str,
+    *,
+    status: str = "failed",
+    total_runtime_seconds: float | None = None,
+    peak_ram_mb: float | None = None,
+) -> BenchmarkResult:
+    return BenchmarkResult(
+        str(run_id), "airllm", str(model_id), compression, status, str(prompt), None, None, None,
+        None, None, total_runtime_seconds, peak_ram_mb, None, None, error, notes
+    )

@@ -6,7 +6,7 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 
 ## Current Status
 
-- Documentation scaffold exists under `docs/`.
+- Supporting documentation exists under `docs/`.
 - Project directories exist for source code, experiments, config, results, and figures.
 - Hardware collection is implemented as the first reproducible experiment.
 - Main assignment model is `Qwen/Qwen2.5-3B-Instruct`.
@@ -19,6 +19,7 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 
 ```text
 .
+|-- .env.example
 |-- config/
 |   `-- experiment.example.json
 |-- docs/
@@ -32,6 +33,7 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |   |-- MEMORY_ESTIMATES.md
 |   |-- MODEL_SELECTION.md
 |   |-- PLAN.md
+|   |-- PROMPT_LOG.md
 |   |-- PRD.md
 |   |-- PRD_benchmarking.md
 |   |-- RESULT_SUMMARY.md
@@ -64,13 +66,27 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |       `-- runners/
 |           |-- __init__.py
 |           |-- airllm.py
+|           |-- airllm_runtime.py
 |           |-- baseline.py
-|           `-- ollama.py
+|           |-- baseline_results.py
+|           |-- baseline_transformers.py
+|           |-- ollama.py
+|           |-- ollama_api.py
+|           |-- ollama_memory.py
+|           `-- process.py
 |-- tests/
 |   |-- conftest.py
+|   |-- test_cli_scripts.py
 |   |-- test_config.py
 |   |-- test_economics.py
+|   |-- test_environment_checks.py
+|   |-- test_metrics.py
 |   |-- test_ollama.py
+|   |-- test_ollama_api.py
+|   |-- test_process_and_wrappers.py
+|   |-- test_reporting_scripts.py
+|   |-- test_runner_results.py
+|   |-- test_runtime_success_paths.py
 |   `-- test_summary.py
 |-- pyproject.toml
 `-- uv.lock
@@ -111,7 +127,7 @@ The model-running commands are more expensive and may download model weights:
 uv run python experiments/run_baseline.py
 uv run python experiments/run_baseline.py --config config/experiment.example.json --allow-download
 uv run python experiments/run_airllm.py --config config/experiment.example.json
-uv run python experiments/run_ollama.py --config config/experiment.example.json
+uv run python experiments/run_ollama.py --config config/experiment.example.json --stream
 ```
 
 The Ollama/GGUF run requires a local Ollama service and the selected GGUF model:
@@ -478,6 +494,7 @@ Passed:
 
 - `uv run python -m compileall experiments src`
 - `uv run python -m pytest`
+- `uv run python -m pytest --cov=src --cov=experiments --cov-report=term-missing`
 - `uv run ruff check experiments src tests`
 - `uv run python experiments/summarize_results.py`
 - `uv run python experiments/make_figures.py`

@@ -23,6 +23,7 @@ hardware, baseline, AirLLM attempts, GGUF quantization, result tables, and Phase
 
 ```text
 .
+|-- .env.example
 |-- README.md
 |-- config/
 |   `-- experiment.example.json
@@ -37,14 +38,17 @@ hardware, baseline, AirLLM attempts, GGUF quantization, result tables, and Phase
 |   |-- MEMORY_ESTIMATES.md
 |   |-- MODEL_SELECTION.md
 |   |-- PLAN.md
+|   |-- PROMPT_LOG.md
 |   |-- PRD.md
 |   |-- PRD_benchmarking.md
 |   |-- RESULT_SUMMARY.md
-|   `-- TODO.md
+|   |-- TODO.md
+|   `-- VERIFICATION.md
 |-- experiments/
 |   |-- check_backends.py
 |   |-- collect_hardware.py
 |   |-- make_figures.py
+|   |-- run_economics.py
 |   |-- run_airllm.py
 |   |-- run_baseline.py
 |   |-- run_ollama.py
@@ -67,8 +71,28 @@ hardware, baseline, AirLLM attempts, GGUF quantization, result tables, and Phase
 |       `-- runners/
 |           |-- __init__.py
 |           |-- airllm.py
+|           |-- airllm_runtime.py
 |           |-- baseline.py
-|           `-- ollama.py
+|           |-- baseline_results.py
+|           |-- baseline_transformers.py
+|           |-- ollama.py
+|           |-- ollama_api.py
+|           |-- ollama_memory.py
+|           `-- process.py
+|-- tests/
+|   |-- conftest.py
+|   |-- test_cli_scripts.py
+|   |-- test_config.py
+|   |-- test_economics.py
+|   |-- test_environment_checks.py
+|   |-- test_metrics.py
+|   |-- test_ollama.py
+|   |-- test_ollama_api.py
+|   |-- test_process_and_wrappers.py
+|   |-- test_reporting_scripts.py
+|   |-- test_runner_results.py
+|   |-- test_runtime_success_paths.py
+|   `-- test_summary.py
 |-- pyproject.toml
 `-- uv.lock
 ```
@@ -173,7 +197,7 @@ Final non-expensive verification includes:
 - Confirm figures can be regenerated.
 - Check for secrets/tokens.
 - Verify required deliverables are present.
-- Record missing optional tooling explicitly if tests/linting are unavailable.
+- Record passing tests and linting in the final verification note.
 
 ## Risks and Mitigations
 
