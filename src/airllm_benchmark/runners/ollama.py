@@ -288,11 +288,13 @@ def _run_ollama_success_path(
         error=None,
         notes=compact_notes(
             [
-                f"Ollama/GGUF was run through the local /api/generate endpoint with stream={str(stream).lower()}.",
+                "Ollama/GGUF was run through the local /api/generate endpoint "
+                f"with stream={str(stream).lower()}.",
                 (
                     "TTFT was measured from the first streamed response chunk."
                     if stream
-                    else "TTFT is null because the non-streaming API response does not expose first-token timing."
+                    else "TTFT is null because the non-streaming API response "
+                    "does not expose first-token timing."
                 ),
                 f"Measured wall-clock request time: {safe_round(wall_seconds)} seconds.",
                 f"Prompt eval duration: {safe_round(prompt_eval_duration)} seconds.",
@@ -331,7 +333,7 @@ class OllamaProcessMemorySampler:
         self._stop_event = threading.Event()
         self._thread = threading.Thread(target=self._sample_loop, daemon=True)
 
-    def __enter__(self) -> "OllamaProcessMemorySampler":
+    def __enter__(self) -> OllamaProcessMemorySampler:
         self._thread.start()
         return self
 

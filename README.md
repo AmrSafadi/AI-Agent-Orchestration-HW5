@@ -19,6 +19,7 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 
 ```text
 .
+|-- .env.example
 |-- config/
 |   `-- experiment.example.json
 |-- docs/
@@ -32,6 +33,7 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |   |-- MEMORY_ESTIMATES.md
 |   |-- MODEL_SELECTION.md
 |   |-- PLAN.md
+|   |-- PROMPT_LOG.md
 |   |-- PRD.md
 |   |-- PRD_benchmarking.md
 |   |-- RESULT_SUMMARY.md
@@ -70,6 +72,7 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 |   |-- conftest.py
 |   |-- test_config.py
 |   |-- test_economics.py
+|   |-- test_metrics.py
 |   |-- test_ollama.py
 |   `-- test_summary.py
 |-- pyproject.toml
@@ -478,6 +481,7 @@ Passed:
 
 - `uv run python -m compileall experiments src`
 - `uv run python -m pytest`
+- `uv run python -m pytest --cov=src --cov=experiments --cov-report=term-missing`
 - `uv run ruff check experiments src tests`
 - `uv run python experiments/summarize_results.py`
 - `uv run python experiments/make_figures.py`

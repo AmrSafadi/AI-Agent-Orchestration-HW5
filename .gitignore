@@ -4,6 +4,8 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+.coverage
+htmlcov/
 
 # Environments
 .venv/
@@ -34,4 +36,3 @@ figures/*.tmp
 Thumbs.db
 .vscode/
 .idea/
-

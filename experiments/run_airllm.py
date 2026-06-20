@@ -56,7 +56,11 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--max-new-tokens", type=int, help="Override generation token limit.")
     parser.add_argument("--temperature", type=float, help="Override generation temperature.")
     parser.add_argument("--output", type=Path, help="Override output JSON path.")
-    parser.add_argument("--huggingface-cache-dir", type=Path, help="Override Hugging Face cache path.")
+    parser.add_argument(
+        "--huggingface-cache-dir",
+        type=Path,
+        help="Override Hugging Face cache path.",
+    )
     parser.add_argument("--layer-shards-saving-path", type=Path, help="Override AirLLM shard path.")
     parser.add_argument("--compression", help="AirLLM compression setting, such as 4bit or 8bit.")
     parser.add_argument(

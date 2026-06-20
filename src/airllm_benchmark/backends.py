@@ -10,7 +10,7 @@ import shutil
 import subprocess
 import sys
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -30,14 +30,17 @@ def collect_backend_check() -> BackendCheckReport:
     """Collect backend availability without downloading or loading model weights."""
 
     return BackendCheckReport(
-        collected_at_utc=datetime.now(timezone.utc).isoformat(),
+        collected_at_utc=datetime.now(UTC).isoformat(),
         platform=_platform_info(),
         python=_python_info(),
         commands={
             "ollama": _ollama_command_check(),
             "llama_cpp_cli": _command_check("llama-cli", ["llama-cli", "--version"]),
             "llama_cpp_server": _command_check("llama-server", ["llama-server", "--version"]),
-            "nvidia_smi": _command_check("nvidia-smi", ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"]),
+            "nvidia_smi": _command_check(
+                "nvidia-smi",
+                ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
+            ),
         },
         python_imports={
             "torch": _python_import_check("torch"),

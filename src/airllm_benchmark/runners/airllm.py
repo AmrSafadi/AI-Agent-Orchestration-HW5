@@ -309,7 +309,8 @@ def _run_airllm_success_path(
         error=None,
         notes=compact_notes(
             [
-                "TTFT is null because this non-streaming AirLLM runner measures total generation only.",
+                "TTFT is null because this non-streaming AirLLM runner "
+                "measures total generation only.",
                 f"Layer shards path: {layer_shards_saving_path}",
                 f"Hugging Face cache path: {huggingface_cache_dir}",
                 f"Compression: {compression or 'none'}",

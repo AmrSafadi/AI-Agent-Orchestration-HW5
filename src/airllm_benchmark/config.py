@@ -134,37 +134,19 @@ def load_gguf_config(config_path: Path, project_root: Path) -> GGUFRunConfig:
 
 
 def _baseline_output_name(model_id: str) -> str:
-    slug = (
-        model_id.lower()
-        .replace("/", "_")
-        .replace("-", "_")
-        .replace(".", "_")
-        .replace(":", "_")
-    )
-    return f"baseline_{slug}.json"
+    return f"baseline_{_slug(model_id)}.json"
 
 
 def _airllm_output_name(model_id: str) -> str:
-    slug = (
-        model_id.lower()
-        .replace("/", "_")
-        .replace("-", "_")
-        .replace(".", "_")
-        .replace(":", "_")
-    )
-    return f"airllm_{slug}.json"
+    return f"airllm_{_slug(model_id)}.json"
 
 
 def _gguf_output_name(model_id: str, quantization: str) -> str:
-    slug = (
-        model_id.lower()
-        .replace("/", "_")
-        .replace("-", "_")
-        .replace(".", "_")
-        .replace(":", "_")
-    )
-    quant_slug = quantization.lower().replace("-", "_")
-    return f"gguf_{slug}_{quant_slug}.json"
+    return f"gguf_{_slug(model_id)}_{_slug(quantization)}.json"
+
+
+def _slug(value: str) -> str:
+    return value.lower().replace("/", "_").replace("-", "_").replace(".", "_").replace(":", "_")
 
 
 def _required_dict(raw: dict[str, Any], key: str) -> dict[str, Any]:

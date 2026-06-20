@@ -45,7 +45,7 @@ class ProcessMemorySampler:
         self._stop_event = threading.Event()
         self._thread = threading.Thread(target=self._sample_loop, daemon=True)
 
-    def __enter__(self) -> "ProcessMemorySampler":
+    def __enter__(self) -> ProcessMemorySampler:
         self._thread.start()
         return self
 
@@ -78,7 +78,7 @@ class ChildProcessMemorySampler:
         self._stop_event = threading.Event()
         self._thread = threading.Thread(target=self._sample_loop, daemon=True)
 
-    def __enter__(self) -> "ChildProcessMemorySampler":
+    def __enter__(self) -> ChildProcessMemorySampler:
         self._thread.start()
         return self
 

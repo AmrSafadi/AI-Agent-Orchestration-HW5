@@ -10,6 +10,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
+DEFAULT_MAIN_PROMPT = "Explain the difference between prefill and decode in local LLM inference."
 
 from airllm_benchmark.config import BaselineRunConfig, load_baseline_config
 from airllm_benchmark.runners.baseline import (
@@ -88,7 +89,7 @@ def _resolve_config(args: argparse.Namespace) -> BaselineRunConfig:
     if args.config is None:
         config = BaselineRunConfig(
             model_id=args.model_id,
-            prompt=args.prompt or "Explain the difference between prefill and decode in local LLM inference.",
+            prompt=args.prompt or DEFAULT_MAIN_PROMPT,
             max_new_tokens=args.max_new_tokens or 64,
             temperature=0.0 if args.temperature is None else args.temperature,
             output_path=args.output or PROJECT_ROOT / "results" / "baseline_override.json",
