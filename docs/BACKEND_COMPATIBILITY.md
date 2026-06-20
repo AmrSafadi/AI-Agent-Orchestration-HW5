@@ -2,10 +2,10 @@
 
 ## Purpose
 
-This document checks backend compatibility before downloading model weights. The
-assignment needs a direct baseline, an AirLLM run, and quantization/performance
-analysis. The selected strategy is to use one main model family where possible,
-then add a quantized GGUF comparison only if the backend is approved.
+This document records backend compatibility checks and the final backend choices
+used by the experiment. The assignment needs a direct baseline, an AirLLM run,
+and quantization/performance analysis. The selected strategy uses one main model
+family where possible, then adds a quantized GGUF comparison through Ollama.
 
 ## Sources Checked
 
@@ -22,7 +22,7 @@ then add a quantized GGUF comparison only if the backend is approved.
 | --- | --- | --- | --- |
 | Completed pipeline validation | `sshleifer/tiny-gpt2` | Hugging Face Transformers | Already ran successfully |
 | Main HF/AirLLM candidate | `Qwen/Qwen2.5-3B-Instruct` | Hugging Face Transformers, SafeTensors, BF16 | Selected main assignment model |
-| Quantized local comparison | `Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` | GGUF, llama.cpp/Ollama | Planned only if a GGUF backend is approved |
+| Quantized local comparison | `Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` | GGUF, Ollama | Completed successfully through Ollama |
 | Backup HF candidate | `microsoft/Phi-3-mini-4k-instruct` | Hugging Face Transformers, SafeTensors | Backup if Qwen 3B has compatibility problems |
 | Deferred too-large candidate | `Qwen/Qwen2.5-7B-Instruct` | Hugging Face Transformers, SafeTensors, BF16 | Not selected for first download |
 
@@ -65,7 +65,8 @@ Decision:
 - Treat `Qwen/Qwen2.5-3B-Instruct` as the main AirLLM candidate.
 - Treat `Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` as an optional GGUF quantized
   comparison candidate.
-- Do not download the 3B model or install AirLLM until explicitly approved.
+- The Qwen 3B AirLLM attempt was run after approval and is preserved as
+  compatibility evidence.
 
 ### Ollama / llama.cpp
 
@@ -78,9 +79,8 @@ ollama run hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M
 
 Decision:
 
-- Ollama or llama.cpp can be used later for the optional GGUF quantized
-  comparison.
-- Because this command downloads model weights, it must not be run yet.
+- Ollama was used for the GGUF quantized comparison.
+- The model was downloaded and benchmarked after approval.
 
 ### Hugging Face Transformers
 
@@ -103,7 +103,7 @@ Decision:
 
 ## Recommended Experiment Path
 
-Use staged checks before any large model download:
+The final staged experiment path was:
 
 1. Keep `sshleifer/tiny-gpt2` as completed pipeline validation.
 2. Prepare the baseline runner for configurable model IDs, prompts, generation
@@ -112,15 +112,12 @@ Use staged checks before any large model download:
    after explicit approval to download model weights.
 4. Use `Qwen/Qwen2.5-3B-Instruct` for AirLLM after explicit approval to install
    AirLLM and create layer shards.
-5. Use `Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` for the optional Ollama/llama.cpp
-   quantized comparison if a GGUF backend is approved.
+5. Use `Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M` for the Ollama quantized
+   comparison with streaming output to measure TTFT.
 
 ## Current Decision
 
-Do not download model weights yet.
-
-Next implementation checkpoint:
-
-- Prepare the configurable baseline runner for `Qwen/Qwen2.5-3B-Instruct`.
-- Keep download/install actions behind explicit approval.
+The backend evidence is complete for submission. Direct Transformers and AirLLM
+provide negative local-deployment evidence, while Ollama/GGUF provides the
+successful quantized local inference path.
 

@@ -45,6 +45,7 @@ hardware, baseline, AirLLM attempts, GGUF quantization, result tables, and Phase
 |   |-- check_backends.py
 |   |-- collect_hardware.py
 |   |-- make_figures.py
+|   |-- run_economics.py
 |   |-- run_airllm.py
 |   |-- run_baseline.py
 |   |-- run_ollama.py
@@ -69,6 +70,7 @@ hardware, baseline, AirLLM attempts, GGUF quantization, result tables, and Phase
 |           |-- airllm.py
 |           |-- baseline.py
 |           `-- ollama.py
+|-- tests/
 |-- pyproject.toml
 `-- uv.lock
 ```
@@ -173,7 +175,7 @@ Final non-expensive verification includes:
 - Confirm figures can be regenerated.
 - Check for secrets/tokens.
 - Verify required deliverables are present.
-- Record missing optional tooling explicitly if tests/linting are unavailable.
+- Record passing tests and linting in the final verification note.
 
 ## Risks and Mitigations
 

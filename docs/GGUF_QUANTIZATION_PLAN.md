@@ -7,7 +7,9 @@ comes after the direct Transformers baseline and AirLLM attempts, and is meant
 to test whether a 4-bit GGUF model is more practical on the available laptop
 hardware.
 
-No backend install or model download has been performed as part of this plan.
+The planned backend install, model download, and benchmark run were completed
+through Ollama. The final raw result is stored in
+`results/gguf_qwen2_5_3b_instruct_q4_k_m.json`.
 
 ## Current Evidence
 
@@ -18,8 +20,9 @@ No backend install or model download has been performed as part of this plan.
 | AirLLM selected model | `Qwen/Qwen2.5-3B-Instruct` | Failed after partial sharding | AirLLM hit a Qwen model-layout compatibility issue |
 | AirLLM backup model | `microsoft/Phi-3-mini-4k-instruct` | Failed after sharding | AirLLM hit a BetterTransformer `phi3` support limitation |
 
-This is enough AirLLM evidence for the report. The next missing comparison is a
-quantized backend that uses a smaller on-disk and in-memory representation.
+This is enough AirLLM evidence for the report. The completed GGUF comparison
+adds a quantized backend that uses a smaller on-disk and in-memory
+representation.
 
 ## Recommended Quantized Target
 
@@ -44,20 +47,21 @@ explain than switching to a completely unrelated model.
 | llama.cpp CLI | Direct GGUF backend; transparent model arguments; strong fit for benchmarking | Requires installing or building llama.cpp binaries | Good fallback if Ollama is not approved or fails |
 | llama-cpp-python | Python integration; easier to wrap in existing benchmark runner | More dependency/build risk on Windows | Defer unless Python integration is required |
 
-The recommended next implementation path is Ollama first, because it minimizes
-new Python dependency risk and provides a clear local quantized inference story.
+The selected implementation path was Ollama, because it minimized new Python
+dependency risk and provided a clear local quantized inference story.
 
-## Planned Command
+## Reproduction Command
 
-The exact command should only be run after explicit approval to install/use
-Ollama and download the GGUF model.
+The benchmarked GGUF path uses the local Ollama service and streaming output so
+TTFT can be measured.
 
 ```powershell
-ollama run hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M
+ollama pull hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M
+uv run python experiments/run_ollama.py --config config/experiment.example.json --stream
 ```
 
-For benchmarking, the project should wrap this with the same prompt and
-generation settings already used by the baseline and AirLLM attempts:
+The benchmark uses the same prompt and generation settings already used by the
+baseline and AirLLM attempts:
 
 ```text
 Prompt: Explain the difference between prefill and decode in local LLM inference.
@@ -71,7 +75,7 @@ Temperature: 0.2
 results/gguf_qwen2_5_3b_instruct_q4_k_m.json
 ```
 
-The result should record:
+The result records:
 
 - Backend name and version.
 - Model ID and quantization.
@@ -82,21 +86,6 @@ The result should record:
 - Output text if generation succeeds.
 - Notes about CPU-only execution and any service startup behavior.
 
-## Stop / Go Criteria
-
-Proceed with the GGUF run only after:
-
-- The user explicitly approves installing/using a GGUF backend.
-- The user explicitly approves downloading the quantized model.
-- The backend availability check confirms the selected backend is installed.
-
-Stop and document instead of forcing the run if:
-
-- Installation requires unsupported system changes.
-- The model pull/download fails repeatedly.
-- The run exceeds the agreed timeout.
-- Memory pressure makes the laptop unusable.
-
 ## Report Angle
 
 The expected final comparison is:
@@ -104,8 +93,8 @@ The expected final comparison is:
 - Direct BF16 Transformers: too slow or timed out.
 - AirLLM: attempted layer-wise loading, but blocked by backend/model
   compatibility.
-- Quantized GGUF Q4: expected to be the most practical local path on this
-  CPU/RAM-only laptop, though still slower than an external API.
+- Quantized GGUF Q4: the successful local path on this CPU/RAM-only laptop,
+  though still slower and lower quality than an external API.
 
 This gives the final report a clear engineering conclusion: local deployment is
 not just about parameter count. Format, quantization, runtime backend,

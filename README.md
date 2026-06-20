@@ -6,7 +6,7 @@ The goal is to document a complete local/on-prem LLM experiment: hardware limits
 
 ## Current Status
 
-- Documentation scaffold exists under `docs/`.
+- Supporting documentation exists under `docs/`.
 - Project directories exist for source code, experiments, config, results, and figures.
 - Hardware collection is implemented as the first reproducible experiment.
 - Main assignment model is `Qwen/Qwen2.5-3B-Instruct`.
@@ -111,7 +111,7 @@ The model-running commands are more expensive and may download model weights:
 uv run python experiments/run_baseline.py
 uv run python experiments/run_baseline.py --config config/experiment.example.json --allow-download
 uv run python experiments/run_airllm.py --config config/experiment.example.json
-uv run python experiments/run_ollama.py --config config/experiment.example.json
+uv run python experiments/run_ollama.py --config config/experiment.example.json --stream
 ```
 
 The Ollama/GGUF run requires a local Ollama service and the selected GGUF model:
